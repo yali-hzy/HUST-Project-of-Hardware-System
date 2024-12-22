@@ -5,7 +5,9 @@ module ram(rst, clk, we, sel, addr, d, q);
     input [3:0] sel;
     input [ADDR_WIDTH-1:0] addr;
     input [DATA_WIDTH-1:0] d;
+    input [ADDR_WIDTH-1:0] dispAddr;
     output [DATA_WIDTH-1:0] q;
+    output [DATA_WIDTH-1:0] dispColor;
     reg [DATA_WIDTH-1:0] ram[0:2**ADDR_WIDTH-1];
     integer i;
 
@@ -39,5 +41,6 @@ module ram(rst, clk, we, sel, addr, d, q);
                 ram[addr] <= d;
         end
     end
+    assign dispColor = ram[dispAddr];
     assign q = ram[addr];
 endmodule

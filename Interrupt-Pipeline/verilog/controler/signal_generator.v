@@ -1,9 +1,11 @@
 module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, ecall, S_type, Beq, Bne, Jalr, JAL, LUI, LBU, Bltu, CSRRSI, CSRRCI, CSRRW, 
-                            LB, LH, LHU, BLT, BGE, BGEU, SB, SH, AUIPC);
+                            LB, LH, LHU, BLT, BGE, BGEU, SB, SH, AUIPC, 
+                            CSRRC, CSRRS, CSRRWI);
     input [4:0] OP_CODE;
     input [4:0] Funct;
     output reg MemToReg, MemWrite, ALU_SRC, RegWrite, ecall, S_type, Beq, Bne, Jalr, JAL, LUI, LBU, Bltu, CSRRSI, CSRRCI, CSRRW;
     output reg LB, LH, LHU, BLT, BGE, BGEU, SB, SH, AUIPC;
+    output reg CSRRC, CSRRS, CSRRWI;
     
     always @(OP_CODE, Funct) begin
         case (OP_CODE)
@@ -73,6 +75,7 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
                 case (Funct[2:0])
                 3'b110: ALU_SRC = 1; // CSRRSI
                 3'b111: ALU_SRC = 1; // CSRRCI
+                3'b101: ALU_SRC = 1; // CSRRWI
                 default: ALU_SRC = 0;
                 endcase
             end
@@ -139,6 +142,9 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
                 3'b110: RegWrite = 1; // CSRRSI
                 3'b111: RegWrite = 1; // CSRRCI
                 3'b001: RegWrite = 1; // CSRRW
+                3'b010: RegWrite = 1; // CSRRS
+                3'b011: RegWrite = 1; // CSRRC
+                3'b101: RegWrite = 1; // CSRRWI
                 default: RegWrite = 0;
                 endcase
             end
@@ -237,6 +243,20 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
             end
             'h5: {LB, LH, LHU, BLT, BGE, BGEU, SB, SH, AUIPC} = 9'b000000001; // auipc
             default: {LB, LH, LHU, BLT, BGE, BGEU, SB, SH, AUIPC} = 9'b000000000;
+        endcase
+    end
+
+    always @(OP_CODE, Funct) begin
+        case (OP_CODE)
+            'h1C: begin
+                case (Funct[2:0])
+                3'b011: {CSRRC, CSRRS, CSRRWI} = 3'b100; // CSRRC
+                3'b010: {CSRRC, CSRRS, CSRRWI} = 3'b010; // CSRRS
+                3'b101: {CSRRC, CSRRS, CSRRWI} = 3'b001; // CSRRWI
+                default: {CSRRC, CSRRS, CSRRWI} = 3'b000;
+                endcase
+            end
+            default: {CSRRC, CSRRS, CSRRWI} = 3'b000;
         endcase
     end
 

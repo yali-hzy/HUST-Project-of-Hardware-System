@@ -10,13 +10,15 @@ module ID2EX(clk, en, rst, RegWrite_in, RegWrite_out,
     LB_in, LB_out, LH_in, LH_out, LHU_in, LHU_out, 
     BLT_in, BLT_out, BGE_in, BGE_out, BGEU_in, BGEU_out, 
     SB_in, SB_out, SH_in, SH_out, 
-    AUIPC_in, AUIPC_out);
+    AUIPC_in, AUIPC_out, 
+    CSRRC_in, CSRRC_out, CSRRS_in, CSRRS_out, CSRRWI_in, CSRRWI_out);
 
     parameter WIDTH = 32;
     input clk, en, rst;
     input RegWrite_in, MemToReg_in, MemWrite_in, LBU_in, ALU_SrcB_in, BEQ_in, BNE_in, BLTU_in, JAL_in, 
         JALR_in, LUI_in, ecall_in, CSRRCI_in, CSRRSI_in, CSRRW_in, Int_Enter_in, uret_in, CSRWrite_in;
     input LB_in, LH_in, LHU_in, BLT_in, BGE_in, BGEU_in, SB_in, SH_in, AUIPC_in;
+    input CSRRC_in, CSRRS_in, CSRRWI_in;
     input [1:0] R1Forward_in, R2Forward_in;
     input [3:0] ALU_OP_in;
     input [WIDTH-1:0] PC_in, IR_in, R1_in, R2_in, SignImm_in, t_in;
@@ -26,6 +28,7 @@ module ID2EX(clk, en, rst, RegWrite_in, RegWrite_out,
     output RegWrite_out, MemToReg_out, MemWrite_out, LBU_out, ALU_SrcB_out, BEQ_out, BNE_out, BLTU_out, JAL_out, 
         JALR_out, LUI_out, ecall_out, CSRRCI_out, CSRRSI_out, CSRRW_out, Int_Enter_out, uret_out, CSRWrite_out;
     output LB_out, LH_out, LHU_out, BLT_out, BGE_out, BGEU_out, SB_out, SH_out, AUIPC_out;
+    output CSRRC_out, CSRRS_out, CSRRWI_out;
     output [1:0] R1Forward_out, R2Forward_out;
     output [3:0] ALU_OP_out;
     output [WIDTH-1:0] PC_out, IR_out, R1_out, R2_out, SignImm_out, t_out;
@@ -75,5 +78,8 @@ module ID2EX(clk, en, rst, RegWrite_in, RegWrite_out,
     sync_reset_reg #(.WIDTH(1)) SB_reg(clk, en, rst, SB_in, SB_out);
     sync_reset_reg #(.WIDTH(1)) SH_reg(clk, en, rst, SH_in, SH_out);
     sync_reset_reg #(.WIDTH(1)) AUIPC_reg(clk, en, rst, AUIPC_in, AUIPC_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRC_reg(clk, en, rst, CSRRC_in, CSRRC_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRS_reg(clk, en, rst, CSRRS_in, CSRRS_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRWI_reg(clk, en, rst, CSRRWI_in, CSRRWI_out);
 
 endmodule

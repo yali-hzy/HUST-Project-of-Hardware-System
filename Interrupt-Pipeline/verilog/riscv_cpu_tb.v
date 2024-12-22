@@ -7,13 +7,13 @@ module interrupt_pipeline_tb(
   reg clk=1;
   reg rst=0;
   wire start=1;
-  reg GO=1;
+  reg GO=0;
   
   reg [2:0] IRQ = 3'b000;
   wire [2:0] IRW;
 
   initial begin
-    GO = 1;
+    GO = 0;
     clk = 1;
     IRQ = 3'b000;
     rst = 1;

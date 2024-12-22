@@ -15,7 +15,7 @@ module interrupt_pipeline_tb(
   initial begin
     clk = 1;
     IRQ = 3'b000;
-    #1 rst = 1;
+  
     #2 rst = 0;
   end
 

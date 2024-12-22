@@ -12,6 +12,7 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
                 3'b110: R1_Used = 1; // ORI
                 3'b100: R1_Used = 1; // XORI
                 3'b010: R1_Used = 1; // SLTI
+                3'b011: R1_Used = 1; // SLTIU
                 3'b001: if (Funct[4:3] == 2'b00) R1_Used = 1; else R1_Used = 0; // SLLI
                 3'b101: if (Funct[4:3] == 2'b00) R1_Used = 1;  // SRLI
                         else if (Funct[4:3] == 2'b10) R1_Used = 1; else R1_Used = 0; // SRAI
@@ -22,6 +23,9 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
                 case (Funct[2:0])
                 3'b010: R1_Used = 1; // lw
                 3'b100: R1_Used = 1; // lbu
+                3'b000: R1_Used = 1; // lb
+                3'b001: R1_Used = 1; // lh
+                3'b101: R1_Used = 1; // lhu
                 default: R1_Used = 0;
                 endcase
             end
@@ -34,12 +38,17 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
                 5'b00010: R1_Used = 1; // SLT
                 5'b00011: R1_Used = 1; // SLTU
                 5'b00101: R1_Used = 1; // SRL
+                5'b00001: R1_Used = 1; // SLL
+                5'b00100: R1_Used = 1; // XOR
+                5'b10101: R1_Used = 1; // SRA
                 default: R1_Used = 0;
                 endcase
             end
             'h8: begin
                 case (Funct[2:0])
                 3'b010: R1_Used = 1; // sw
+                3'b000: R1_Used = 1; // sb
+                3'b001: R1_Used = 1; // sh
                 default: R1_Used = 0;
                 endcase
             end
@@ -53,6 +62,9 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
                 3'b000: R1_Used = 1; // beq
                 3'b001: R1_Used = 1; // bne
                 3'b110: R1_Used = 1; // bltu
+                3'b100: R1_Used = 1; // blt
+                3'b101: R1_Used = 1; // bge
+                3'b111: R1_Used = 1; // bgeu
                 default: R1_Used = 0;
                 endcase
             end
@@ -77,12 +89,17 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
                 5'b00010: R2_Used = 1; // SLT
                 5'b00011: R2_Used = 1; // SLTU
                 5'b00101: R2_Used = 1; // SRL
+                5'b00001: R2_Used = 1; // SLL
+                5'b00100: R2_Used = 1; // XOR
+                5'b10101: R2_Used = 1; // SRA
                 default: R2_Used = 0;
                 endcase
             end
             'h8: begin
                 case (Funct[2:0])
                 3'b010: R2_Used = 1; // sw
+                3'b000: R2_Used = 1; // sb
+                3'b001: R2_Used = 1; // sh
                 default: R2_Used = 0;
                 endcase
             end
@@ -97,6 +114,9 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
                 3'b000: R2_Used = 1; // beq
                 3'b001: R2_Used = 1; // bne
                 3'b110: R2_Used = 1; // bltu
+                3'b100: R2_Used = 1; // blt
+                3'b101: R2_Used = 1; // bge
+                3'b111: R2_Used = 1; // bgeu
                 default: R2_Used = 0;
                 endcase
             end

@@ -7,7 +7,7 @@ module rom_text(read_addr, data);
 
   reg [DATA_WIDTH-1:0] rom[0:((2**ADDR_WIDTH)-1)];
 
-  initial $readmemh("D:/Users/hzy/Desktop/HUST/course/Hardware/Interrupt-Pipeline/verilog/risc-v-nested_interrupt.hex",rom, 0, ((2**ADDR_WIDTH)-1));
+  initial $readmemh("D:/Users/hzy/Desktop/HUST/course/Hardware/Interrupt-Pipeline/verilog/test.hex",rom, 0, ((2**ADDR_WIDTH)-1));
 
   assign data = rom[read_addr];
 endmodule

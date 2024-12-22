@@ -37,6 +37,7 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
 
     wire ID_MemToReg, ID_MemWrite, ID_ALU_SRC, ID_RegWrite, ID_uret, ID_ecall, S_type, ID_Beq, ID_Bne, 
         ID_Jalr, ID_JAL, ID_LUI, ID_LBU, ID_Bltu, ID_CSRRSI, ID_CSRRCI, ID_CSRRW;
+    wire ID_LB, ID_LH, ID_LHU, ID_BLT, ID_BGE, ID_BGEU, ID_SB, ID_SH, ID_AUIPC;
     wire [3:0] ID_ALU_OP;
     wire R1_Used, R2_Used;
 
@@ -49,7 +50,8 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     controler #(.WIDTH(WIDTH)) CONTROLER(OP_CODE, Funct, IR21, ID_ALU_OP, 
         ID_MemToReg, ID_MemWrite, ID_ALU_SRC, ID_RegWrite, ID_uret, ID_ecall, S_type, ID_Beq, ID_Bne, 
         ID_Jalr, ID_JAL, ID_LUI, ID_LBU, ID_Bltu, ID_CSRRSI, ID_CSRRCI, ID_CSRRW,
-        R1_Used, R2_Used);
+        R1_Used, R2_Used,
+        ID_LB, ID_LH, ID_LHU, ID_BLT, ID_BGE, ID_BGEU, ID_SB, ID_SH, ID_AUIPC);
 
     wire [2:0] IR, IRS, IP, WB_IRS;
     wire IE, WB_IEWriteData, WB_IEWrite, WB_EPCWrite, WB_uret;
@@ -116,16 +118,19 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     wire signed [WIDTH-1:0] JalImm;
     assign JalImm = {{12{ID_IR[31]}},ID_IR[19:12],ID_IR[20],ID_IR[30:21],1'b0};
 
-    wire signed [WIDTH-1:0] LUIImm;
-    assign LUIImm = {ID_IR[31:12],12'b0};
+    wire signed [WIDTH-1:0] UImm;
+    assign UImm = {ID_IR[31:12],12'b0};
 
     wire ID_B;
     wire [1:0] Imm_type;
-    assign ID_B = ID_Beq | ID_Bne | ID_Bltu;
+    assign ID_B = ID_Beq | ID_Bne | ID_Bltu | ID_BLT | ID_BGE | ID_BGEU;
 
-    priority_encoder42 immPri(.x0(1'b1), .x1(ID_B), .x2(ID_JAL), .x3(ID_LUI), .y(Imm_type), .sel(_));
+    wire ID_U;
+    assign ID_U = ID_LUI | ID_AUIPC;
+
+    priority_encoder42 immPri(.x0(1'b1), .x1(ID_B), .x2(ID_JAL), .x3(ID_U), .y(Imm_type), .sel(_));
     wire [WIDTH-1:0] ID_SignImm;
-    mux41 #(.DATA_WIDTH(WIDTH)) ImmMUX(.a(Imm), .b(BImm), .c(JalImm), .d(LUIImm), .sel(Imm_type), .out(ID_SignImm));
+    mux41 #(.DATA_WIDTH(WIDTH)) ImmMUX(.a(Imm), .b(BImm), .c(JalImm), .d(UImm), .sel(Imm_type), .out(ID_SignImm));
 
     wire flush;
     wire [1:0] R1Forward, R2Forward;
@@ -139,6 +144,7 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
 
     wire [WIDTH-1:0] EX_PC, EX_IR, EX_R1, EX_R2, EX_SignImm;
     wire EX_MemWrite, EX_LBU, EX_Beq, EX_Bne, EX_Bltu, EX_JAL, EX_Jalr, EX_LUI;
+    wire EX_LB, EX_LH, EX_LHU, EX_Blt, EX_Bge, EX_Bgeu, EX_SB, EX_SH, EX_AUIPC;
     wire [3:0] EX_ALU_OP;
     wire EX_ALU_SRC, EX_ecall;
     wire [1:0] FwdA, FwdB;
@@ -167,7 +173,11 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         .CSRRW_in(ID_CSRRW), .CSRRW_out(EX_CSRRW), .uret_in(ID_uret), .uret_out(EX_uret), 
         .Int_Enter_in(ID_Int_Enter), .Int_Enter_out(EX_Int_Enter), .CSRWrite_in(ID_CSRWrite), .CSRWrite_out(EX_CSRWrite),
         .csr_in(ID_csr), .csr_out(EX_csr), .zimm_in(ID_zimm), .zimm_out(EX_zimm), .t_in(ID_t), .t_out(EX_t), 
-        .IRS_in(ID_IRS), .IRS_out(EX_IRS));
+        .IRS_in(ID_IRS), .IRS_out(EX_IRS),
+        .LB_in(ID_LB), .LB_out(EX_LB), .LH_in(ID_LH), .LH_out(EX_LH), .LHU_in(ID_LHU), .LHU_out(EX_LHU),
+        .BLT_in(ID_BLT), .BLT_out(EX_Blt), .BGE_in(ID_BGE), .BGE_out(EX_Bge), .BGEU_in(ID_BGEU), .BGEU_out(EX_Bgeu),
+        .SB_in(ID_SB), .SB_out(EX_SB), .SH_in(ID_SH), .SH_out(EX_SH),
+        .AUIPC_in(ID_AUIPC), .AUIPC_out(EX_AUIPC));
 
     wire [WIDTH-1:0] True_R1, True_R2, MEM_ALUout;
     mux41 #(.DATA_WIDTH(WIDTH)) R1MUX(.a(EX_R1), .b(WB_Din), .c(MEM_ALUout), .d(0), .sel(FwdA), .out(True_R1));
@@ -215,12 +225,13 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
 
     wire EX_J, EX_B;
     assign EX_J = EX_JAL | EX_Jalr;
-    assign EX_B = (EX_Beq & Equal) | (EX_Bne & ~Equal) | (EX_Bltu & LT);
+    assign EX_B = (EX_Beq & Equal) | (EX_Bne & ~Equal) | ((EX_Bltu | EX_Blt) & LT) | ((EX_Bgeu | EX_Bge) & GE);
     assign BranchTaken = EX_J | EX_B;
 
     reg [WIDTH-1:0] EX_ALUResult;
-    always @(EX_LUI, EX_J, EX_SignImm, EX_PC, ALUout, EX_CSRRCI, EX_CSRRSI, EX_CSRRW, EX_t) begin
+    always @(*) begin
         if (EX_LUI) EX_ALUResult = EX_SignImm;
+        else if (EX_AUIPC) EX_ALUResult = EX_PC + EX_SignImm;
         else if (EX_J) EX_ALUResult = EX_PC + 4;
         else if (EX_CSRRCI || EX_CSRRSI || EX_CSRRW) EX_ALUResult = EX_t;
         else EX_ALUResult = ALUout;
@@ -243,6 +254,7 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
 
     wire [WIDTH-1:0] MEM_WriteData;
     wire MEM_LBU, MEM_MemToReg, MEM_MemWrite, MEM_ecall;
+    wire MEM_LB, MEM_LH, MEM_LHU, MEM_SB, MEM_SH;
     wire [WIDTH-1:0] MEM_PC, MEM_IR, MEM_a0, MEM_a7;
     wire MEM_uret, MEM_Int_Enter, MEM_IEWrite, MEM_EPCWrite, MEM_IEWriteData;
     wire [WIDTH-1:0] MEM_EPCWriteData;
@@ -259,12 +271,30 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         .IEWrite_in(EX_IEWrite), .IEWrite_out(MEM_IEWrite), .EPCWrite_in(EX_EPCWrite), .EPCWrite_out(MEM_EPCWrite),
         .IEWriteData_in(EX_IEWriteData), .IEWriteData_out(MEM_IEWriteData), 
         .EPCWriteData_in(EX_EPCWriteData), .EPCWriteData_out(MEM_EPCWriteData), 
-        .IRS_in(EX_IRS), .IRS_out(MEM_IRS));
+        .IRS_in(EX_IRS), .IRS_out(MEM_IRS), 
+        .LB_in(EX_LB), .LB_out(MEM_LB), .LH_in(EX_LH), .LH_out(MEM_LH), .LHU_in(EX_LHU), .LHU_out(MEM_LHU),
+        .SB_in(EX_SB), .SB_out(MEM_SB), .SH_in(EX_SH), .SH_out(MEM_SH));
 
     wire [WIDTH-1:0] MemData;
     wire [9:0] MemData_addr;
     assign MemData_addr = MEM_ALUout[11:2];
-    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(10)) RAM(rst, clk, MEM_MemWrite, MemData_addr, MEM_WriteData, MemData);
+    reg [3:0] ram_sel;
+
+    always @(*) begin
+        if (MEM_SB) begin
+            if (MEM_ALUout[1:0] == 2'b00) ram_sel = 4'b0001;
+            else if (MEM_ALUout[1:0] == 2'b01) ram_sel = 4'b0010;
+            else if (MEM_ALUout[1:0] == 2'b10) ram_sel = 4'b0100;
+            else ram_sel = 4'b1000;
+        end
+        else if (MEM_SH) begin
+            if (MEM_ALUout[1]) ram_sel = 4'b1100;
+            else ram_sel = 4'b0011;
+        end
+        else ram_sel = 4'b1111;
+    end
+
+    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(10)) RAM(.rst(rst), .clk(clk), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData));
 
     wire [7:0] LoadByte;
     wire [7:0] MemDataByte0, MemDataByte1, MemDataByte2, MemDataByte3;
@@ -275,10 +305,17 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     wire [1:0] ByteIndex;
     assign ByteIndex = MEM_ALUout[1:0];
     mux41 #(.DATA_WIDTH(8)) ByteMUX(.a(MemDataByte0), .b(MemDataByte1), .c(MemDataByte2), .d(MemDataByte3), .sel(ByteIndex), .out(LoadByte));
+    wire [15:0] LoadHalf;
+    assign LoadHalf = MEM_ALUout[1] ? {MemData[31:16]} : {MemData[15:0]};
 
-    wire [WIDTH-1:0] MEM_MemToRegData;
-    assign MEM_MemToRegData = MEM_LBU ? {24'b0,LoadByte} : MemData;
-
+    reg [WIDTH-1:0] MEM_MemToRegData;
+    always @(*) begin
+        if (MEM_LBU) MEM_MemToRegData = {24'b0,LoadByte};
+        else if (MEM_LB) MEM_MemToRegData = {{24{LoadByte[7]}},LoadByte};
+        else if (MEM_LHU) MEM_MemToRegData = {16'b0,LoadHalf};
+        else if (MEM_LH) MEM_MemToRegData = {{16{LoadHalf[15]}},LoadHalf};
+        else MEM_MemToRegData = MemData;
+    end
     wire [WIDTH-1:0] WB_MemData, WB_ALUResult;
     wire WB_MemToReg;
     wire [WIDTH-1:0] WB_PC, WB_IR;

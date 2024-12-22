@@ -1,0 +1,147 @@
+warning: unused import: `game::handle_input`
+  --> src/trap/mod.rs:21:5
+   |
+21 |     game::handle_input,
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: function `handle_input` is never used
+ --> src/game.rs:1:8
+  |
+1 | pub fn handle_input(input: usize) {
+  |        ^^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+warning: function `handle_up` is never used
+  --> src/game.rs:11:4
+   |
+11 | fn handle_up() {}
+   |    ^^^^^^^^^
+
+warning: function `handle_down` is never used
+  --> src/game.rs:13:4
+   |
+13 | fn handle_down() {}
+   |    ^^^^^^^^^^^
+
+warning: function `handle_left` is never used
+  --> src/game.rs:15:4
+   |
+15 | fn handle_left() {}
+   |    ^^^^^^^^^^^
+
+warning: function `handle_right` is never used
+  --> src/game.rs:17:4
+   |
+17 | fn handle_right() {}
+   |    ^^^^^^^^^^^^
+
+
+main:	file format elf32-littleriscv
+
+Disassembly of section .text:
+
+00000000 <_start>:
+       0:      	auipc	sp, 0x0
+       4:      	addi	sp, sp, 0x590
+       8:      	auipc	ra, 0x0
+       c:      	jalr	0x164(ra) <rust_main>
+		...
+
+00000030 <__alltraps>:
+      30:      	addi	sp, sp, -0x110
+      34:      	sw	ra, 0x8(sp)
+      38:      	sw	gp, 0x18(sp)
+      3c:      	sw	t0, 0x28(sp)
+      40:      	sw	t1, 0x30(sp)
+      44:      	sw	t2, 0x38(sp)
+      48:      	sw	s0, 0x40(sp)
+      4c:      	sw	s1, 0x48(sp)
+      50:      	sw	a0, 0x50(sp)
+      54:      	sw	a1, 0x58(sp)
+      58:      	sw	a2, 0x60(sp)
+      5c:      	sw	a3, 0x68(sp)
+      60:      	sw	a4, 0x70(sp)
+      64:      	sw	a5, 0x78(sp)
+      68:      	sw	a6, 0x80(sp)
+      6c:      	sw	a7, 0x88(sp)
+      70:      	sw	s2, 0x90(sp)
+      74:      	sw	s3, 0x98(sp)
+      78:      	sw	s4, 0xa0(sp)
+      7c:      	sw	s5, 0xa8(sp)
+      80:      	sw	s6, 0xb0(sp)
+      84:      	sw	s7, 0xb8(sp)
+      88:      	sw	s8, 0xc0(sp)
+      8c:      	sw	s9, 0xc8(sp)
+      90:      	sw	s10, 0xd0(sp)
+      94:      	sw	s11, 0xd8(sp)
+      98:      	sw	t3, 0xe0(sp)
+      9c:      	sw	t4, 0xe8(sp)
+      a0:      	sw	t5, 0xf0(sp)
+      a4:      	sw	t6, 0xf8(sp)
+      a8:      	csrr	t1, mepc
+      ac:      	sw	t0, 0x100(sp)
+      b0:      	sw	t1, 0x108(sp)
+      b4:      	sw	t2, 0x10(sp)
+      b8:      	mv	a0, sp
+      bc:      	auipc	ra, 0x0
+      c0:      	jalr	0x8c(ra) <trap_handler>
+
+000000c4 <__restore>:
+      c4:      	lw	t1, 0x108(sp)
+      c8:      	csrw	mepc, t1
+      cc:      	lw	ra, 0x8(sp)
+      d0:      	lw	gp, 0x18(sp)
+      d4:      	lw	t0, 0x28(sp)
+      d8:      	lw	t1, 0x30(sp)
+      dc:      	lw	t2, 0x38(sp)
+      e0:      	lw	s0, 0x40(sp)
+      e4:      	lw	s1, 0x48(sp)
+      e8:      	lw	a0, 0x50(sp)
+      ec:      	lw	a1, 0x58(sp)
+      f0:      	lw	a2, 0x60(sp)
+      f4:      	lw	a3, 0x68(sp)
+      f8:      	lw	a4, 0x70(sp)
+      fc:      	lw	a5, 0x78(sp)
+     100:      	lw	a6, 0x80(sp)
+     104:      	lw	a7, 0x88(sp)
+     108:      	lw	s2, 0x90(sp)
+     10c:      	lw	s3, 0x98(sp)
+     110:      	lw	s4, 0xa0(sp)
+     114:      	lw	s5, 0xa8(sp)
+     118:      	lw	s6, 0xb0(sp)
+     11c:      	lw	s7, 0xb8(sp)
+     120:      	lw	s8, 0xc0(sp)
+     124:      	lw	s9, 0xc8(sp)
+     128:      	lw	s10, 0xd0(sp)
+     12c:      	lw	s11, 0xd8(sp)
+     130:      	lw	t3, 0xe0(sp)
+     134:      	lw	t4, 0xe8(sp)
+     138:      	lw	t5, 0xf0(sp)
+     13c:      	lw	t6, 0xf8(sp)
+     140:      	addi	sp, sp, 0x110
+     144:      	mret
+
+00000148 <trap_handler>:
+     148:      	csrr	a0, mcause
+     14c:      	li	a7, 0x22
+     150:      	lui	a0, 0xdeadc
+     154:      	addi	a0, a0, -0x111
+     158:      	mv	a0, a0
+     15c:      	ecall
+     160:      	li	a7, 0x5d
+     164:      	ecall
+     168:      	ret
+
+0000016c <rust_main>:
+     16c:      	li	a7, 0x22
+     170:      	lui	a0, 0x0
+     174:      	addi	a0, a0, 0x30
+     178:      	mv	a0, a0
+     17c:      	ecall
+     180:      	lui	a0, 0xa0
+     184:      	sb	zero, 0x0(a0)
+     188:      	nop
+     18c:      	j	0x184 <rust_main+0x18>

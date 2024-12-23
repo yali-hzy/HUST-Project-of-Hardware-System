@@ -20,66 +20,49 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module GetScreenRam(clk, x, y, addr, data, Info);
-    parameter SCREEN_WIDTH = 10;
+module GetScreenRam(x, y, addr, data, color);
+    parameter SCREEN_WIDTH = 11;
     parameter ADDR_WIDTH = 25;
     parameter DATA_WIDTH = 32;
-    input clk;
     input [SCREEN_WIDTH-1:0] x;
     input [SCREEN_WIDTH-1:0] y;
     output [ADDR_WIDTH-1:0] addr;
     input [DATA_WIDTH-1:0] data;
-    output [DATA_WIDTH-1:0] Info;
+    output [11:0] color;
     
-    reg [DATA_WIDTH-1:0] tmp_Info;
+    reg [3:0] colorId;
     reg [SCREEN_WIDTH-1:0] tmp_x;
     reg [SCREEN_WIDTH-1:0] tmp_y;
     
     localparam START_ADDR = 'h0;
-    localparam HPW = 96;
-    localparam HFP = 8;
-    localparam Width = 640;
-    localparam HMax = 800;
     
-    localparam VPW = 2;
-    localparam Height = 480;
-    localparam VFP = 2;
-    localparam VMax = 525;
-    localparam Boarder = 3;
-    
-    localparam width = 480;
+    localparam width = 488;
     localparam height = 280;
-    localparam wst = (Width - width) >> 1;
-    localparam hst = (Height - height) >> 1; 
+    localparam wst = 76;
+    localparam hst = 100; 
     
     always @* begin
-        if (x < Width)tmp_x = x;
-        else tmp_x = Width;
-        if (y < Height)tmp_y = y;
-        else tmp_y = Height;
+        if (x > wst - 1 && x < wst + width)tmp_x = x;
+        else tmp_x = wst + width;
+        if (y > hst - 1 && y < hst + height)tmp_y = y;
+        else tmp_y = hst + height;
     end
     
-    assign addr = START_ADDR + ((((tmp_y-hst)*Width) + tmp_x-wst) >> 3);
-    always @(posedge clk) begin
-        if (x == HMax - 1 && y == VMax - 1) begin
-            tmp_Info[31] <= 1;
-        end else begin
-            tmp_Info[31] <= 0;
-        end
-        tmp_Info[7+2*SCREEN_WIDTH:7+SCREEN_WIDTH+1] <= tmp_x;
-        tmp_Info[7+SCREEN_WIDTH:8] <= tmp_y;
+    assign addr = START_ADDR + ((((tmp_y-hst)*width) + tmp_x-wst) >> 3);
+    always @(*) begin
         case (x[2:0])
-            4: tmp_Info[3:0] <= data[3:0];
-            5: tmp_Info[3:0] <= data[7:4];
-            6: tmp_Info[3:0] <= data[11:8];
-            7: tmp_Info[3:0] <= data[15:12];
-            0: tmp_Info[3:0] <= data[19:16];
-            1: tmp_Info[3:0] <= data[23:20];
-            2: tmp_Info[3:0] <= data[27:24];
-            3: tmp_Info[3:0] <= data[31:28];
+            4: colorId = data[3:0];
+            5: colorId = data[7:4];
+            6: colorId = data[11:8];
+            7: colorId = data[15:12];
+            0: colorId = data[19:16];
+            1: colorId = data[23:20];
+            2: colorId = data[27:24];
+            3: colorId = data[31:28];
         endcase
     end
-    assign Info = tmp_Info;
+    
+    ColorCvt colorcvt(colorId, color);
     
     
 endmodule

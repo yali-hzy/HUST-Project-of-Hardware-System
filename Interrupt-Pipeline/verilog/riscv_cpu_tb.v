@@ -17,7 +17,7 @@ module interrupt_pipeline_tb(
   reg [7:0] SEG;
   reg [7:0] AN;
   reg [ADDR_WIDTH-1:0] dispAddr;
-  wire [32:0] dispColor;
+  wire [31:0] dispColor;
   
   reg [2:0] IRQ = 3'b000;
   wire [2:0] IRW;
@@ -29,7 +29,7 @@ module interrupt_pipeline_tb(
     rawclk = 1;
     IRQ = 3'b000;
     rst = 1;
-    dispAddr = 0;
+    dispAddr = 16'h2;
     #2 rst = 0;
   end
 
@@ -42,7 +42,7 @@ module interrupt_pipeline_tb(
   
   wire [WIDTH-1:0] clocks;
 
-  counter Counter(clk, clocks);
+//  counter Counter(clk, clocks);
 
   // always @(negedge clk) begin
   //   IRQ[0] <= (clocks == 'h0001 || clocks == 'h0258) ? 1 : 0;

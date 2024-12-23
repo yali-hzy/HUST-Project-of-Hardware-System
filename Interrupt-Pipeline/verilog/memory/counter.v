@@ -1,9 +1,13 @@
 module counter(clk, out);
-parameter WIDTH = 32;
-input clk;                    // 计数时钟
-output reg [WIDTH-1:0] out = 0;             // 计数值
-
-always @(posedge clk)  begin  // 在时钟上升沿计数器加1
-    out <= out + 1;                        // 功能实现
-end                           
+    localparam WIDTH = 3;
+    input clk;                    
+    output [WIDTH-1:0] out;
+    reg [WIDTH-1:0] tmp_out = 0;             
+    
+    
+    
+    always @(posedge clk)  begin  
+        tmp_out <= tmp_out + 1;                        
+    end                
+    assign out = tmp_out;           
 endmodule

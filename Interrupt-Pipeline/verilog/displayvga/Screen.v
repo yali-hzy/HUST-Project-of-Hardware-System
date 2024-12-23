@@ -56,24 +56,24 @@ module Screen(color, clk, info);
     
     wire [3:0] colorId;
 //    reg i = 0;
-    ColorCvt colorCvt(colorId, color);
+//    ColorCvt colorCvt(colorId, color);
     localparam Width = 640;
     localparam Height = 480;
-    localparam width = 480;
+    localparam width = 488;
     localparam height = 280;
-    localparam wst = (Width - width) >> 1;
-    localparam hst = (Height - height) >> 1; 
+    localparam wst = 76;
+    localparam hst = 100; 
     
     assign x = (info[7+2*SCREEN_WIDTH:7+SCREEN_WIDTH+1]>>1);
     assign y = (info[7+SCREEN_WIDTH:8]>>1);
     reg [0:0] flag;
     always @* begin
-        if (x > wst - 1  && x < wst + width && y > hst - 1 && y < hst + height) flag = 1;
+        if (x > wst - 1 && x < wst + width && y > hst - 1 && y < hst + height) flag = 1;
         else flag = 0;
     end
     
     
-    wire [18:0] idx;
+    wire [17:0] idx;
     assign idx = ((y-hst)*(width) + x-wst);
     
     vram mem(.clka(clk), .clkb(clk), .addra(idx), .addrb(idx), .dina(info[3:0]), .doutb(colorId), .wea(flag), .ena(flag), .enb(flag));

@@ -30,7 +30,7 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW
     wire [WIDTH-1:0] IF_IR;
     wire [ADDR_WIDTH-1:0] text_addr;
     assign text_addr = IF_PC[1+ADDR_WIDTH:2];
-    rom_text #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) ROM(text_addr, IF_IR);
+    rom_text #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) ROM(text_addr, IF_IR, rawclk);
 
     wire [WIDTH-1:0] ID_PC, ID_IR;
     wire IF2ID_en, IF2ID_rst;

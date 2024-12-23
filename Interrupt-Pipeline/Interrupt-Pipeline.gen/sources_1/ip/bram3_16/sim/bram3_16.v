@@ -110,7 +110,7 @@ output wire [7 : 0] doutb;
     .C_LOAD_INIT_FILE(0),
     .C_INIT_FILE_NAME("no_coe_file_loaded"),
     .C_INIT_FILE("bram3_16.mem"),
-    .C_USE_DEFAULT_DATA(0),
+    .C_USE_DEFAULT_DATA(1),
     .C_DEFAULT_DATA("0"),
     .C_HAS_RSTA(0),
     .C_RST_PRIORITY_A("CE"),

@@ -23,7 +23,7 @@ module ram(rst, clk, we, sel, addr, d, q
     
     
     
-    always @(posedge clk or posedge rst) begin
+    always @(posedge (rawclk) or posedge rst) begin
         if (rst) begin
             ram <= 0;  // 使用非阻塞赋值清零
         end

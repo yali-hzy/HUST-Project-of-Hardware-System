@@ -9,15 +9,17 @@ module ram(rst, clk, we, sel, addr, d, q
     input [DATA_WIDTH-1:0] d;
     input [ADDR_WIDTH-1:0] dispAddr;
     output [DATA_WIDTH-1:0] q;
+//    wire [DATA_WIDTH-1:0] q;
     output [DATA_WIDTH-1:0] dispColor;
     reg [DATA_WIDTH-1:0] ram;
+//    reg [DATA_WIDTH-1:0] Ram[2**ADDR_WIDTH-1:0];
 //    integer i;
 
-    initial begin
+//    initial begin
 //        for (i = 0; i < 2**ADDR_WIDTH; i = i + 1) begin
-            ram = 0;
+//            Ram [i]= 0;
 //        end
-    end
+//    end
     
     
     
@@ -43,6 +45,28 @@ module ram(rst, clk, we, sel, addr, d, q
         end
     end
     
+//    always @(posedge clk or posedge rst) begin
+//        if (rst) begin
+//            Ram[addr] <= 0;  // 使用非阻塞赋值清零
+//        end
+//        else if (we) begin
+//            if (sel == 4'b0001)
+//                Ram[addr][7:0] <= d[7:0];
+//            else if (sel == 4'b0010)
+//                Ram[addr][15:8] <= d[7:0];
+//            else if (sel == 4'b0100)
+//                Ram[addr][23:16] <= d[7:0];
+//            else if (sel == 4'b1000)
+//                Ram[addr][31:24] <= d[7:0];
+//            else if (sel == 4'b0011)
+//                Ram[addr][15:0] <= d[15:0];
+//            else if (sel == 4'b1100)
+//                Ram[addr][31:16] <= d[15:0];
+//            else
+//                Ram[addr] <= d;
+//        end
+//    end
+    
 //    bram0 mem0(.clka(clk), .dina(d[7:0]), .douta(q[7:0]), .addra(addr), .wea(sel[0] & we), .clkb(rawclk), .addrb(dispAddr), .doutb(dispColor[7:0]), .ena(1), .enb(1));
 //    bram1 mem1(.clka(clk), .dina(d[15:8]), .douta(q[15:8]), .addra(addr), .wea(sel[1] & we), .clkb(rawclk), .addrb(dispAddr), .doutb(dispColor[15:8]), .ena(1), .enb(1));
 //    bram2 mem2(.clka(clk), .dina(d[23:16]), .douta(q[23:16]), .addra(addr), .wea(sel[2] & we), .clkb(rawclk), .addrb(dispAddr), .doutb(dispColor[23:16]), .ena(1), .enb(1));
@@ -54,5 +78,5 @@ module ram(rst, clk, we, sel, addr, d, q
     bram3_16 mem3(.clka(rawclk), .dina(ram[31:24]), .douta(q[31:24]), .addra(addr), .wea(sel[3] & we), .clkb(rawclk), .addrb(dispAddr), .doutb(dispColor[31:24]), .dinb(0), .web(0));
 
 //    assign dispColor = ram[dispAddr];
-//    assign q = ram[addr];
+//    assign Q = q;
 endmodule

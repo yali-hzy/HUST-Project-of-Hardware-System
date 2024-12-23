@@ -16,7 +16,7 @@ module interrupt_pipeline_tb(
   reg VGA_VS;
   reg [7:0] SEG;
   reg [7:0] AN;
-  reg [16:0] dispAddr;
+  reg [ADDR_WIDTH-1:0] dispAddr;
   wire [32:0] dispColor;
   
   reg [2:0] IRQ = 3'b000;

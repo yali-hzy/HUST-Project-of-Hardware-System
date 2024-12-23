@@ -11,7 +11,7 @@ always @(posedge clk or posedge rst)  begin
     else
     if (en) begin
         counter <= counter + 1;
-        if (counter == N/2) begin
+        if (counter >= N/2) begin
             counter <= 0;
             clk_N <= ~clk_N;
         end

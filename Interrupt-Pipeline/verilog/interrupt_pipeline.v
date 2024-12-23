@@ -18,7 +18,7 @@ module interrupt_pipeline(start, rst, clk, GO, SEG, AN, IRQ, IRW
     wire CLK;
     wire clk_n2;
     parameter WIDTH = 32;
-    parameter ADDR_WIDTH = 14;
+    parameter ADDR_WIDTH = 16;
     parameter SCREEN_WIDTH = 10;
     wire [WIDTH-1:0] LedData;
     

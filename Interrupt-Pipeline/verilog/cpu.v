@@ -6,7 +6,7 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW
 , dispAddr, dispColor, rawclk
 );
     parameter WIDTH = 32;
-    parameter ADDR_WIDTH = 25;
+    parameter ADDR_WIDTH = 16;
     input rst, clk, GO, rawclk;
     input [2:0] IRQ;
     input [ADDR_WIDTH-1:0] dispAddr;

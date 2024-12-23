@@ -1,0 +1,21 @@
+[package]
+name = "magic_cube"
+version = "0.1.0"
+edition = "2021"
+authors = ["Luyan Zhou <luyan_zhou@outlook.com>"]
+
+
+[build-dependencies]
+lazy_static = "1.5.0"
+
+
+[[bin]]
+name = "magic_cube"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
+
+[dependencies]
+riscv = "0.12.1"

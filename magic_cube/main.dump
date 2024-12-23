@@ -39,15 +39,15 @@ warning: function `handle_right` is never used
    |    ^^^^^^^^^^^^
 
 
-main:	file format elf32-littleriscv
+magic_cube:	file format elf32-littleriscv
 
 Disassembly of section .text:
 
 00000000 <_start>:
-       0:      	auipc	sp, 0x0
-       4:      	addi	sp, sp, 0x590
+       0:      	auipc	sp, 0x51
+       4:      	addi	sp, sp, -0x120
        8:      	auipc	ra, 0x0
-       c:      	jalr	0x164(ra) <rust_main>
+       c:      	jalr	0x15c(ra) <rust_main>
 		...
 
 00000030 <__alltraps>:
@@ -127,21 +127,23 @@ Disassembly of section .text:
 00000148 <trap_handler>:
      148:      	csrr	a0, mcause
      14c:      	li	a7, 0x22
-     150:      	lui	a0, 0xdeadc
-     154:      	addi	a0, a0, -0x111
-     158:      	mv	a0, a0
+     150:      	mv	a0, a0
+     154:      	ecall
+     158:      	li	a7, 0x5d
      15c:      	ecall
-     160:      	li	a7, 0x5d
-     164:      	ecall
-     168:      	ret
+     160:      	ret
 
-0000016c <rust_main>:
-     16c:      	li	a7, 0x22
-     170:      	lui	a0, 0x0
-     174:      	addi	a0, a0, 0x30
-     178:      	mv	a0, a0
-     17c:      	ecall
-     180:      	lui	a0, 0xa0
-     184:      	sb	zero, 0x0(a0)
-     188:      	nop
-     18c:      	j	0x184 <rust_main+0x18>
+00000164 <rust_main>:
+     164:      	li	a7, 0x22
+     168:      	lui	a0, 0x0
+     16c:      	addi	a0, a0, 0x30
+     170:      	mv	a0, a0
+     174:      	ecall
+     178:      	li	a0, 0x1
+     17c:      	lui	a1, 0x40
+     180:      	li	a7, 0x22
+     184:      	mv	a0, a0
+     188:      	ecall
+     18c:      	sb	zero, 0x0(a1)
+     190:      	addi	a0, a0, 0x1
+     194:      	j	0x180 <rust_main+0x1c>

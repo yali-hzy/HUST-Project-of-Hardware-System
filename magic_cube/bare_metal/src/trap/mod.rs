@@ -16,10 +16,7 @@ use core::arch::global_asm;
 
 use riscv::register::mcause;
 
-use crate::{
-    console::{pause, print},
-    game::handle_input,
-};
+use crate::console::{pause, print};
 
 global_asm!(include_str!("trap.s"));
 
@@ -42,7 +39,7 @@ pub fn trap_handler() {
         //     handle_input(mcause);
         // }
         _ => {
-            print(0xdeadbeef);
+            print(mcause);
             pause();
         }
     }

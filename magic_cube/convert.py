@@ -23,6 +23,8 @@ def generate_bin_file(elf_file: str):
 def convert_bin_to_hex(bin_file, hex_file):
     with open(bin_file, "rb") as f:
         with open(hex_file, "w") as g:
+            g.write("MEMORY_INITIALIZATION_RADIX=16;\n")
+            g.write("MEMORY_INITIALIZATION_VECTOR=\n")
             count = 0
             while True:
                 bytes = f.read(4)
@@ -33,7 +35,7 @@ def convert_bin_to_hex(bin_file, hex_file):
                 for byte in bytes:
                     g.write("{:02X}".format(byte))
                 count += 4
-                g.write("\n")
+                g.write(",\n")
             print("Convert {} bytes from {} to {}".format(count, bin_file, hex_file))
 
 

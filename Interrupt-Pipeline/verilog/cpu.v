@@ -2,10 +2,16 @@
   EX、MEM段有写CSR，就要暂停PC,IF/ID段，清空ID/EX段
   CSRRSI, CSRRCI, CSRRW, URET, 隐指令
 */
-module cpu (rst, clk, GO, LedData, IRQ, IRW);
+module cpu (rst, clk, GO, LedData, IRQ, IRW
+, dispAddr, dispColor, rawclk
+);
     parameter WIDTH = 32;
-    input rst, clk, GO;
+    parameter ADDR_WIDTH = 16;
+    input rst, clk, GO, rawclk;
     input [2:0] IRQ;
+    input [ADDR_WIDTH-1:0] dispAddr;
+    
+    output [WIDTH-1:0] dispColor;
     output [2:0] IRW;
     output [WIDTH-1:0] LedData;
 
@@ -22,9 +28,9 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     register #(.WIDTH(WIDTH)) PC_reg(clk, PC_en, rst, PC_next, IF_PC);
 
     wire [WIDTH-1:0] IF_IR;
-    wire [9:0] text_addr;
-    assign text_addr = IF_PC[11:2];
-    rom_text #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(10)) ROM(text_addr, IF_IR);
+    wire [ADDR_WIDTH-1:0] text_addr;
+    assign text_addr = IF_PC[1+ADDR_WIDTH:2];
+    rom_text #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) ROM(text_addr, IF_IR);
 
     wire [WIDTH-1:0] ID_PC, ID_IR;
     wire IF2ID_en, IF2ID_rst;
@@ -305,8 +311,8 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         .CAUSEWriteData_in(EX_CAUSEWriteData), .CAUSEWriteData_out(MEM_CAUSEWriteData));
 
     wire [WIDTH-1:0] MemData;
-    wire [9:0] MemData_addr;
-    assign MemData_addr = MEM_ALUout[11:2];
+    wire [ADDR_WIDTH-1:0] MemData_addr;
+    assign MemData_addr = MEM_ALUout[1+ADDR_WIDTH:2];
     reg [3:0] ram_sel;
 
     always @(*) begin
@@ -322,8 +328,14 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         end
         else ram_sel = 4'b1111;
     end
+    
+    
 
-    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(10)) RAM(.rst(rst), .clk(clk), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData));
+    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) RAM(.rst(rst), .clk(clk), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData)
+    , .dispAddr(dispAddr), .dispColor(dispColor), .rawclk(rawclk)
+    );
+    
+    
 
     wire [7:0] LoadByte;
     wire [7:0] MemDataByte0, MemDataByte1, MemDataByte2, MemDataByte3;

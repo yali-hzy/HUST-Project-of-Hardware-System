@@ -35,20 +35,23 @@ module GetScreenRam(x, y, addr, data, color);
     reg [SCREEN_WIDTH-1:0] tmp_y;
     
     localparam START_ADDR = 'h0;
-    
+    localparam Width = 640;
+    localparam Height = 480;
     localparam width = 488;
     localparam height = 280;
-    localparam wst = 76;
-    localparam hst = 100; 
+//    localparam width = 640;
+//    localparam height = 480;
+    localparam wst = (Width - width)>>1;
+    localparam hst = (Height - height)>>1; 
     
-    always @* begin
-        if (x > wst - 1 && x < wst + width)tmp_x = x;
-        else tmp_x = wst + width;
-        if (y > hst - 1 && y < hst + height)tmp_y = y;
-        else tmp_y = hst + height;
-    end
+//    always @* begin
+//        if (x >= wst && x < wst + width)tmp_x = x;
+//        else tmp_x = wst + width;
+//        if (y >= hst && y < hst + height)tmp_y = y;
+//        else tmp_y = hst + height;
+//    end
     
-    assign addr = START_ADDR + ((((tmp_y-hst)*width) + tmp_x-wst) >> 3);
+    assign addr = START_ADDR + (((tmp_y * width) + tmp_x) >> 3);
     always @(*) begin
         case (x[2:0])
             4: colorId = data[3:0];

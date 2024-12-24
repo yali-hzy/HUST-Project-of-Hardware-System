@@ -47,10 +47,10 @@ module interrupt_pipeline(input start,
     wire [WIDTH-1:0] dispColor;
     
     
-    divider #(.N(160)) CLK_N1(start, rst, clk, CLK_p);
-    divider #(.N(100_000)) CLK_N2(1, 0, clk, clk_n2_p);
-    divider #(.N(40)) CLK_N3(start, rst, clk, clk_vga_p);
-    divider #(.N(20)) CLK_N4(start, rst, clk, clk_bram_p);
+    divider #(.N(8)) CLK_N1(clk, CLK_p);
+    divider #(.N(100_000)) CLK_N2(clk, clk_n2_p);
+    divider #(.N(2)) CLK_N3(clk, clk_vga_p);
+    divider #(.N(1)) CLK_N4(clk, clk_bram_p);
     
 //    BUFG bufg_CLK(.O(CLK), .I(CLK_p));
 //    BUFG bufg_clkn2(.O(clk_n2), .I(clk_n2_p));

@@ -48,25 +48,29 @@ module interrupt_pipeline(input start,
     wire [WIDTH-1:0] dispColor;
     
     
-    divider #(.N(8)) CLK_N1(clk, CLK_p);
-    divider #(.N(100_000)) CLK_N2(clk, clk_n2_p);
-    divider #(.N(2)) CLK_N3(clk, clk_vga_p);
-    divider #(.N(1)) CLK_N4(clk, clk_bram_p);
-    
-//    BUFG bufg_CLK(.O(CLK), .I(CLK_p));
-//    BUFG bufg_clkn2(.O(clk_n2), .I(clk_n2_p));
-//    BUFG bufg_clk_vga(.O(clk_vga), .I(clk_vga_p));
-//    BUFG bufg_clk_bram(.O(clk_bram), .I(clk_bram_p));
+    divider #(.N(100_0)) CLK_N1(start, clk, CLK_p);
+    divider #(.N(100_000)) CLK_N2(1'b1, clk, clk_n2_p);
+    divider #(.N(2)) CLK_N3(1'b1, clk, clk_vga_p);
+    divider #(.N(1)) CLK_N4(1'b1, clk, clk_bram_p);
+//    assign clk_bram_p = clk;    
+    BUFG bufg_CLK(.O(CLK), .I(CLK_p));
+    BUFG bufg_clkn2(.O(clk_n2), .I(clk_n2_p));
+    BUFG bufg_clk_vga(.O(clk_vga), .I(clk_vga_p));
+    BUFG bufg_clk_bram(.O(clk_bram), .I(clk_bram_p));
 
-    assign CLK = CLK_p;
-    assign clk_n2 = clk_n2_p;
-    assign clk_vga = clk_vga_p;
-    assign clk_bram = clk_bram_p;
+//    assign CLK = CLK_p;
+//    assign clk_n2 = clk_n2_p;
+//    assign clk_vga = clk_vga_p;
+//    assign clk_bram = clk_bram_p;
     
     cpu #(.WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) CPU(rst, CLK, GO, LedData, BTN, IRW
     , dispAddr, dispColor, clk_bram
     );
+//    wire [WIDTH-1:0] Addr_Led;
+//    assign Addr_Led = {16'b0, dispAddr};
+    
    display #(.WIDTH(WIDTH)) DISPLAY(clk_n2, LedData, SEG, AN);
+    
     
     
 //    VGA
@@ -77,6 +81,6 @@ module interrupt_pipeline(input start,
 //    wire [WIDTH-1:0] Info;
 //    Screen #(.SCREEN_WIDTH(SCREEN_WIDTH)) screen(.color(color), .clk(clk_bram), .info(Info));
     
-    GetScreenRam #(.ADDR_WIDTH(ADDR_WIDTH), .SCREEN_WIDTH(SCREEN_WIDTH)) getScreenRam(.x(VGA_X), .y(VGA_Y), .addr(dispAddr), .data(dispColor), .color(color));
+    GetScreenRam #(.ADDR_WIDTH(ADDR_WIDTH), .SCREEN_WIDTH(SCREEN_WIDTH)) getScreenRam(.rst(rst), .x(VGA_X), .y(VGA_Y), .addr(dispAddr), .data(dispColor), .color(color));
     
 endmodule

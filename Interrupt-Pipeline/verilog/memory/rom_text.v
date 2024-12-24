@@ -1,7 +1,7 @@
 module rom_text(read_addr, data, rawclk);
   parameter DATA_WIDTH = 32;
   parameter ADDR_WIDTH = 10;
-  localparam TRUE_ADDR_WIDTH = 15;
+  localparam TRUE_ADDR_WIDTH = 16;
   input rawclk;
   input [ADDR_WIDTH-1:0] read_addr;
   output [DATA_WIDTH-1:0] data;

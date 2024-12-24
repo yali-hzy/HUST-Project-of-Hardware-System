@@ -177,10 +177,14 @@ module Vga(input wire clk,     // 65 MHz
       //////////////////////////////// COLOR OUT ///////////////////////////////
       //////////////////////////////////////////////////////////////////////////
       // Assign colors if in active mode
-      red_reg<= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)? {color_in[11:8],4'd0}:8'd0):8'd0):8'd0 ;
-      green_reg<=(h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)? {color_in[11:8],4'd0}:8'd0):8'd0):8'd0 ;
-      blue_reg<= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)? {color_in[11:8],4'd0}:8'd0):8'd0):8'd0 ;
+      red_reg <= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)? {color_in[11:8],4'd0}:8'd0):8'd0):8'd0 ;
+      green_reg <= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)? {color_in[7:4],4'd0}:8'd0):8'd0):8'd0 ;
+      blue_reg <= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)? {color_in[3:0],4'd0}:8'd0):8'd0):8'd0 ;
       
+      
+//      red_reg <= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?{color_in[11:8],4'd0}:8'd0):8'd0 ;
+//      green_reg <= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?{color_in[7:4],4'd0}:8'd0):8'd0 ;
+//      blue_reg <= (h_state == H_ACTIVE_STATE)?((v_state == V_ACTIVE_STATE)?{color_in[3:0],4'd0}:8'd0):8'd0 ;
     end
   end
   // Assign output values - to VGA connector
@@ -190,8 +194,11 @@ module Vga(input wire clk,     // 65 MHz
   assign green = green_reg[7:4] ;
   assign blue  = blue_reg[7:4] ;
   // The x/y coordinates that should be available on the NEXT cycle
-  assign next_x = (h_state == H_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)?h_counter:11'd0):11'd0 ;
-  assign next_y = (v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)?v_counter:11'd0):11'd0 ;
+  assign next_x = (h_state == H_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)?(h_counter-hst):11'd0):11'd0;
+  assign next_y = (v_state == V_ACTIVE_STATE)?((h_counter >= hst && h_counter <= hed && v_counter >= vst && v_counter <=ved)?(v_counter-vst):11'd0):11'd0;
+  
+//  assign next_x = (h_state == H_ACTIVE_STATE)?h_counter:11'd0;
+//  assign next_y = (v_state == V_ACTIVE_STATE)?v_counter:11'd0;
   
 endmodule
 

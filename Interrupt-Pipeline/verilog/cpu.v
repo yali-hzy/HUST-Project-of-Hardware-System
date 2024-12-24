@@ -340,9 +340,12 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     
     
 
-    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) RAM(.rst(rst), .clk(clk), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData)
+    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) RAM(.rst(rst), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData)
     , .dispAddr(dispAddr), .dispColor(dispColor), .rawclk(rawclk)
     );
+//    RegRam #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) RAM(.rst(rst), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData)
+//    , .dispAddr(dispAddr), .dispColor(dispColor), .clk(clk)
+//    );
     
     
 

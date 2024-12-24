@@ -36,11 +36,9 @@ module vga_tb(
   wire VGA_VS;
   wire [7:0] SEG;
   wire [7:0] AN;
-  reg [ADDR_WIDTH-1:0] dispAddr;
-  wire [31:0] dispColor;
   
   reg [2:0] IRQ = 3'b000;
-  wire [2:0] IRW;
+  wire [3:0] BTN;
   reg rawclk = 1;
 
   initial begin
@@ -49,8 +47,7 @@ module vga_tb(
     rawclk = 1;
     IRQ = 3'b000;
     rst = 1;
-    dispAddr = 0;
-    #2 rst = 0;
+    #20 rst = 0;
   end
 
   always #10 clk = ~clk;
@@ -74,7 +71,7 @@ module vga_tb(
 //  , dispAddr, dispColor, rawclk
 //  );
 
-    interrupt_pipeline Interupt(start, rst, rawclk, GO, SEG, AN, IRQ, IRW
+    interrupt_pipeline Interupt(start, rst, rawclk, GO, SEG, AN, IRQ, BTN
     , VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS
     )  ;
 //    parameter SCREEN_WIDTH = 10;

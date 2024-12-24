@@ -76,7 +76,7 @@ module Screen(color, clk, info);
     wire [17:0] idx;
     assign idx = ((y-hst)*(width) + x-wst);
     
-    vram mem(.clka(clk), .clkb(clk), .addra(idx), .addrb(idx), .dina(info[3:0]), .doutb(colorId), .wea(flag), .ena(flag), .enb(flag));
+//    vram mem(.clka(clk), .clkb(clk), .addra(idx), .addrb(idx), .dina(info[3:0]), .doutb(colorId), .wea(flag), .ena(flag), .enb(flag));
     
 //    wire [SCREEN_WIDTH-7:0] type;
 //    wire [5:0] bias;

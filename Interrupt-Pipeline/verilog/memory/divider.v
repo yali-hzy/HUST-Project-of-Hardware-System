@@ -1,5 +1,5 @@
-module divider(clk, clk_N);
-  input clk;                          // 系统时钟
+module divider(start, clk, clk_N);
+  input clk, start;                          // 系统时钟
   output reg clk_N;                   // 分频后的时钟
   reg [31:0] counter;
   /* 计数器变量，通过计数实现分频。
@@ -11,13 +11,13 @@ module divider(clk, clk_N);
     clk_N = 0;
   end
   always @(posedge clk)  begin    // 时钟上升沿
-    counter = counter + 1;
-    if (counter == N) begin
-      clk_N   <= ~clk_N;
-      counter <= 0;
-    end
-    else begin
-      clk_N = clk_N;
+    if (start) begin
+        if (counter == N - 1) begin
+          clk_N   <=  ~clk_N;
+          counter <= 0;
+        end
+        else
+          counter <= counter + 1;
     end
   end
 endmodule

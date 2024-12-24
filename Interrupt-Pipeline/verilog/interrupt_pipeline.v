@@ -4,7 +4,8 @@ module interrupt_pipeline(input start,
     input GO,
     output [7:0] SEG,
     output [7:0] AN,
-    (* clock_buffer_type="none" *) input [2:0] IRQ,
+    // (* clock_buffer_type="none" *) input [2:0] IRQ,
+    input [3:0] BTN,
     output [2:0] IRW,
     output [3:0] VGA_R,
     output [3:0] VGA_G,
@@ -62,10 +63,10 @@ module interrupt_pipeline(input start,
     assign clk_vga = clk_vga_p;
     assign clk_bram = clk_bram_p;
     
-    cpu #(.WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) CPU(rst, CLK, GO, LedData, IRQ, IRW
+    cpu #(.WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) CPU(rst, CLK, GO, LedData, BTN, IRW
     , dispAddr, dispColor, clk_bram
     );
-//    display #(.WIDTH(WIDTH)) DISPLAY(clk_n2, LedData, SEG, AN);
+   display #(.WIDTH(WIDTH)) DISPLAY(clk_n2, LedData, SEG, AN);
     
     
 //    VGA

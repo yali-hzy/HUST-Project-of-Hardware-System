@@ -2,13 +2,13 @@
   EX、MEM段有写CSR，就要暂停PC,IF/ID段，清空ID/EX段
   CSRRSI, CSRRCI, CSRRW, URET, 隐指令
 */
-module cpu (rst, clk, GO, LedData, IRQ, IRW
+module cpu (rst, clk, GO, LedData, BTN, IRW
 , dispAddr, dispColor, rawclk
 );
     parameter WIDTH = 32;
     parameter ADDR_WIDTH = 16;
     input rst, clk, GO, rawclk;
-    input [2:0] IRQ;
+    input [3:0] BTN;
     input [ADDR_WIDTH-1:0] dispAddr;
     
     output [WIDTH-1:0] dispColor;
@@ -60,6 +60,11 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW
         R1_Used, R2_Used,
         ID_LB, ID_LH, ID_LHU, ID_BLT, ID_BGE, ID_BGEU, ID_SB, ID_SH, ID_AUIPC, 
         ID_CSRRC, ID_CSRRS, ID_CSRRWI);
+
+    wire [2:0] IRQ;
+    wire [1:0] IRQ_data [0:2];
+
+    priority_encoder42 btn_irq(.x0(BTN[0]), .x1(BTN[1]), .x2(BTN[2]), .x3(BTN[3]), .y(IRQ_data[0]), .sel(IRQ[0]));
 
     wire [2:0] IR, IRS, IP, WB_IRS;
     wire IE, WB_IEWriteData, WB_IEWrite, WB_EPCWrite, WB_uret;
@@ -237,7 +242,11 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW
     assign EX_CAUSEWrite = (EX_CSR_OP) && EX_csr == 'h342 || EX_Int_Enter;
     always @(*) begin
         if (EX_CSR_OP) EX_CAUSEWriteData = EX_csr == 'h342 ? csrdatain : 0;
-        else if (EX_Int_Enter) EX_CAUSEWriteData = 0; //TODO
+        else if (EX_Int_Enter) begin
+            if (EX_IRS == 3'b001) EX_CAUSEWriteData = {30'b0, IRQ_data[0]};
+            else if (EX_IRS == 3'b010) EX_CAUSEWriteData = 0; //TODO
+            else EX_CAUSEWriteData = 0; //TODO
+        end
         else EX_CAUSEWriteData = 0;
     end
 

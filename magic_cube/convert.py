@@ -22,21 +22,48 @@ def generate_bin_file(elf_file: str):
 
 def convert_bin_to_hex(bin_file, hex_file):
     with open(bin_file, "rb") as f:
-        with open(hex_file, "w") as g:
+        count = 0
+        bytes = f.read(4)
+        with open(hex_file + "_rom.coe", "w") as g:
             g.write("MEMORY_INITIALIZATION_RADIX=16;\n")
             g.write("MEMORY_INITIALIZATION_VECTOR=\n")
-            count = 0
-            while True:
-                bytes = f.read(4)
-                if not bytes:
-                    break
+
+            while bytes:
                 # Little endian
                 bytes = bytes[::-1]
                 for byte in bytes:
                     g.write("{:02X}".format(byte))
-                count += 4
                 g.write(",\n")
-            print("Convert {} bytes from {} to {}".format(count, bin_file, hex_file))
+                bytes = f.read(4)
+
+                count += 4
+                if count >= 0x20000:
+                    break
+
+        with open(hex_file + "_ram0.coe", "w") as ram0:
+            ram0.write("MEMORY_INITIALIZATION_RADIX=16;\n")
+            ram0.write("MEMORY_INITIALIZATION_VECTOR=\n")
+            with open(hex_file + "_ram1.coe", "w") as ram1:
+                ram1.write("MEMORY_INITIALIZATION_RADIX=16;\n")
+                ram1.write("MEMORY_INITIALIZATION_VECTOR=\n")
+                with open(hex_file + "_ram2.coe", "w") as ram2:
+                    ram2.write("MEMORY_INITIALIZATION_RADIX=16;\n")
+                    ram2.write("MEMORY_INITIALIZATION_VECTOR=\n")
+                    with open(hex_file + "_ram3.coe", "w") as ram3:
+                        ram3.write("MEMORY_INITIALIZATION_RADIX=16;\n")
+                        ram3.write("MEMORY_INITIALIZATION_VECTOR=\n")
+
+                        while bytes:
+                            # Little endian
+                            bytes = bytes[::-1]
+                            # for byte in bytes:
+                            ram0.write("{:02X},\n".format(bytes[0]))
+                            ram1.write("{:02X},\n".format(bytes[1]))
+                            ram2.write("{:02X},\n".format(bytes[2]))
+                            ram3.write("{:02X},\n".format(bytes[3]))
+                            bytes = f.read(4)
+
+        print("Convert {} bytes from {} to {}".format(count, bin_file, hex_file))
 
 
 if __name__ == "__main__":
@@ -45,6 +72,6 @@ if __name__ == "__main__":
         sys.exit(1)
     elf_file = sys.argv[1]
     bin_file = generate_bin_file(elf_file)
-    hex_file = elf_file.split("/")[-1] + ".hex"
+    hex_file = elf_file.split("/")[-1]
     convert_bin_to_hex(bin_file, hex_file)
     print("Done")

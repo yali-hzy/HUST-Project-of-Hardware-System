@@ -7,8 +7,8 @@ use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use std::time::Duration;
 
-const WIDTH: u32 = 640;
-const HEIGHT: u32 = 480;
+const WIDTH: u32 = 488;
+const HEIGHT: u32 = 280;
 
 struct SDL2Painter<'a> {
     texture: sdl2::render::Texture<'a>,
@@ -72,7 +72,7 @@ pub fn main() {
 
     // 创建一个纹理
     let texture_creator = canvas.texture_creator();
-    let mut texture = texture_creator
+    let texture = texture_creator
         .create_texture_streaming(PixelFormatEnum::ARGB8888, WIDTH, HEIGHT)
         .map_err(|e| e.to_string())
         .unwrap();
@@ -84,7 +84,7 @@ pub fn main() {
         b: 0,
     };
 
-    painter.set_color(1);
+    game::init(&mut painter);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {

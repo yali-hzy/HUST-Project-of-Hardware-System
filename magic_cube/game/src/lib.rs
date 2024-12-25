@@ -1,5 +1,14 @@
 #![no_std]
 
+use render::draw_chess;
+use render::W;
+// use render::A;
+// use render::S;
+// use render::D;
+
+mod render;
+
+
 const WIDTH: usize = 488;
 const HEIGHT: usize = 280;
 pub trait Painter {
@@ -21,6 +30,7 @@ pub fn init(painter: &mut impl Painter) {
         painter.draw(WIDTH >> 1, y);
         painter.draw(WIDTH - 1, y);
     }
+    draw_chess(painter);
 }
 
 #[allow(dead_code)]
@@ -32,6 +42,7 @@ pub fn handle_up(painter: &mut impl Painter) {
         painter.draw(POS.0 + 1, POS.1);
         painter.draw(POS.0 + 1, POS.1 + 1);
     }
+    W(painter);
 }
 
 #[allow(dead_code)]
@@ -43,6 +54,7 @@ pub fn handle_down(painter: &mut impl Painter) {
         painter.draw(POS.0 + 1, POS.1);
         painter.draw(POS.0 + 1, POS.1 + 1);
     }
+    //S(painter);
 }
 
 #[allow(dead_code)]
@@ -54,6 +66,7 @@ pub fn handle_left(painter: &mut impl Painter) {
         painter.draw(POS.0 + 1, POS.1);
         painter.draw(POS.0 + 1, POS.1 + 1);
     }
+    //A(painter);
 }
 
 #[allow(dead_code)]
@@ -65,4 +78,5 @@ pub fn handle_right(painter: &mut impl Painter) {
         painter.draw(POS.0 + 1, POS.1);
         painter.draw(POS.0 + 1, POS.1 + 1);
     }
+    //D(painter);
 }

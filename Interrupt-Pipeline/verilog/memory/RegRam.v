@@ -23,7 +23,7 @@
 module RegRam(rst, we, sel, addr, d, q
 , dispAddr, dispColor, clk
 );
-    parameter ADDR_WIDTH = 10;
+    parameter ADDR_WIDTH = 16;
     parameter DATA_WIDTH = 32;
     input we, rst, clk;
     input [3:0] sel;
@@ -34,6 +34,7 @@ module RegRam(rst, we, sel, addr, d, q
 //    wire [DATA_WIDTH-1:0] q;
     output [DATA_WIDTH-1:0] dispColor;
     reg [DATA_WIDTH-1:0] ram [(2**ADDR_WIDTH)-1:0];
+    initial $readmemh("C:/Users/13183/Documents/cc_exp/HUST-Project-of-Hardware-System/Interrupt-Pipeline/coe/ram.hex",ram, 0, ((2**ADDR_WIDTH)-1));
     
     always @(posedge clk or posedge rst) begin
         if (rst) begin

@@ -178,6 +178,9 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     wire EX_CSRRC, EX_CSRRS, EX_CSRRWI;
     wire [2:0] EX_IRS;
 
+    wire invalid_IR;
+    assign invalid_IR = (ID_IR[1:0] != 2'b11);
+
     ID2EX #(.WIDTH(WIDTH)) id2ex(.clk(clk), .en(Continue), .rst(id2ex_rst), 
         .RegWrite_in(ID_RegWrite), .RegWrite_out(EX_RegWrite), .WriteRegNo_in(ID_Wno), .WriteRegNo_out(EX_WriteRegNo),
         .MemToReg_in(ID_MemToReg), .MemToReg_out(EX_MemToReg), .MemWrite_in(ID_MemWrite), .MemWrite_out(EX_MemWrite),
@@ -199,7 +202,8 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
         .SB_in(ID_SB), .SB_out(EX_SB), .SH_in(ID_SH), .SH_out(EX_SH),
         .AUIPC_in(ID_AUIPC), .AUIPC_out(EX_AUIPC), 
         .CSRRC_in(ID_CSRRC), .CSRRC_out(EX_CSRRC), .CSRRS_in(ID_CSRRS), .CSRRS_out(EX_CSRRS), 
-        .CSRRWI_in(ID_CSRRWI), .CSRRWI_out(EX_CSRRWI));
+        .CSRRWI_in(ID_CSRRWI), .CSRRWI_out(EX_CSRRWI), 
+        .invalid_IR(invalid_IR));
 
     wire [WIDTH-1:0] True_R1, True_R2, MEM_ALUout;
     mux41 #(.DATA_WIDTH(WIDTH)) R1MUX(.a(EX_R1), .b(WB_Din), .c(MEM_ALUout), .d(0), .sel(FwdA), .out(True_R1));
@@ -404,7 +408,7 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     assign halt = ecall & (a7 != 'h22);
     assign LedEn = ecall & (a7 == 'h22);
 
-    register #(.WIDTH(WIDTH)) LedDataReg(clk, LedEn, rst, a0, LedData);
+    register #(.WIDTH(WIDTH)) LedDataReg(rawclk, LedEn, rst, a0, LedData);
 //     wire [WIDTH-1:0] MockLedData;
 //     assign MockLedData = ((EX_PC)<<16) | (a0 & 32'h0000ffff);
 //     register #(.WIDTH(WIDTH)) LedDataReg(clk, 1'b1, rst, MockLedData, LedData);
@@ -413,7 +417,7 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     assign GoRegRst = !ecall | rst;
     assign GoRegData = GO && halt;
 
-    register #(.WIDTH(1)) GoReg(clk, 1'b1, GoRegRst, GoRegData, GoRegOut);
+    register #(.WIDTH(1)) GoReg(rawclk, 1'b1, GoRegRst, GoRegData, GoRegOut);
 
     assign Continue = GoRegOut | !halt;
 

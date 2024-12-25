@@ -14,7 +14,9 @@ module rom_text(read_addr, data, rawclk);
 
 //  initial $readmemh("D:/Users/hzy/Desktop/HUST/course/Hardware/Interrupt-Pipeline/verilog/magic_cube.hex",rom, 0, ((2**ADDR_WIDTH)-1));
 
-  brom rom(.addra(read_addr[TRUE_ADDR_WIDTH-1:0]), .clka(rawclk), .douta(data));
+  wire [TRUE_ADDR_WIDTH-1:0] addra;
+  assign addra = read_addr[TRUE_ADDR_WIDTH-1:0];
+  brom rom(.addra(addra), .clka(rawclk), .douta(data));
 //  assign data = rom[read_addr];
 endmodule
 

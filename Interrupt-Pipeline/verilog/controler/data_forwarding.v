@@ -18,8 +18,14 @@ module data_forwarding(R1_Used, R1no, R2_Used, R2no,
     
     wire [1:0] R1_Pri_out, R2_Pri_out;
 
-    priority_encoder42 R1_Pri(1'b1, MEM_RegWrite & (MEM_WriteRegNo == R1no), EX_RegWrite & (EX_WriteRegNo == R1no), 1'b0, R1_Pri_out, _);
-    priority_encoder42 R2_Pri(1'b1, MEM_RegWrite & (MEM_WriteRegNo == R2no), EX_RegWrite & (EX_WriteRegNo == R2no), 1'b0, R2_Pri_out, _);
+    wire R1_pri_1, R1_pri_2, R2_pri_1, R2_pri_2;
+    assign R1_pri_1 = MEM_RegWrite & (MEM_WriteRegNo == R1no);
+    assign R1_pri_2 = EX_RegWrite & (EX_WriteRegNo == R1no);
+    assign R2_pri_1 = MEM_RegWrite & (MEM_WriteRegNo == R2no);
+    assign R2_pri_2 = EX_RegWrite & (EX_WriteRegNo == R2no);
+
+    priority_encoder42 R1_Pri(1'b1, R1_pri_1, R1_pri_2, 1'b0, R1_Pri_out, _);
+    priority_encoder42 R2_Pri(1'b1, R2_pri_1, R2_pri_2, 1'b0, R2_Pri_out, _);
 
     assign R1Forward = R1_USED & R1_Pri_out;
     assign R2Forward = R2_USED & R2_Pri_out;

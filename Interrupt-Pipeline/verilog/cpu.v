@@ -226,27 +226,27 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     assign EX_CSR_OP = EX_CSRRCI | EX_CSRRSI | EX_CSRRW | EX_CSRRC | EX_CSRRS | EX_CSRRWI;
     assign EX_IEWrite = (EX_CSR_OP) && EX_csr == 'h304 || EX_uret || EX_Int_Enter;
     always @(*) begin
-        if (EX_CSR_OP) EX_IEWriteData = EX_csr == 'h304 ? csrdatain[0] : 1;
+        if (EX_Int_Enter) EX_IEWriteData = 0;
+        else if (EX_CSR_OP) EX_IEWriteData = EX_csr == 'h304 ? csrdatain[0] : 1;
         else if (EX_uret) EX_IEWriteData = 1;
-        else if (EX_Int_Enter) EX_IEWriteData = 0;
         else EX_IEWriteData = 1;
     end
 
     assign EX_EPCWrite = (EX_CSR_OP) && EX_csr == 'h341 || EX_Int_Enter;
     always @(*) begin
-        if (EX_CSR_OP) EX_EPCWriteData = EX_csr == 'h341 ? csrdatain : 0;
-        else if (EX_Int_Enter) EX_EPCWriteData = EX_PC;
+        if (EX_Int_Enter) EX_EPCWriteData = EX_PC;
+        else if (EX_CSR_OP) EX_EPCWriteData = EX_csr == 'h341 ? csrdatain : 0;
         else EX_EPCWriteData = 0;
     end
 
     assign EX_CAUSEWrite = (EX_CSR_OP) && EX_csr == 'h342 || EX_Int_Enter;
     always @(*) begin
-        if (EX_CSR_OP) EX_CAUSEWriteData = EX_csr == 'h342 ? csrdatain : 0;
-        else if (EX_Int_Enter) begin
+        if (EX_Int_Enter) begin
             if (EX_IRS == 3'b001) EX_CAUSEWriteData = {30'b0, IRQ_data[0]};
             else if (EX_IRS == 3'b010) EX_CAUSEWriteData = 0; //TODO
             else EX_CAUSEWriteData = 0; //TODO
         end
+        else if (EX_CSR_OP) EX_CAUSEWriteData = EX_csr == 'h342 ? csrdatain : 0;
         else EX_CAUSEWriteData = 0;
     end
 
@@ -278,10 +278,7 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     end
 
     always @(EX_Jalr, ALUout, BranchTaken, IF_PC, EX_SignImm, EX_PC, WB_uret, WB_Int_Enter, WB_IRS, EPC) begin
-        if (EX_Jalr) PC_next = ALUout & 'hFFFFFFFE;
-        else if (BranchTaken) PC_next = EX_SignImm + EX_PC;
-        else if (WB_uret) PC_next = EPC;
-        else if (WB_Int_Enter) begin
+         if (WB_Int_Enter) begin
             case (WB_IRS) 
                 3'b001: PC_next = 'h00000030;
                 3'b010: PC_next = 'h00003170;
@@ -289,6 +286,9 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
                 default: PC_next = IF_PC + 4;
             endcase
         end
+        else if (EX_Jalr) PC_next = ALUout & 'hFFFFFFFE;
+        else if (BranchTaken) PC_next = EX_SignImm + EX_PC;
+        else if (WB_uret) PC_next = EPC;
         else PC_next = IF_PC + 4;
     end
 

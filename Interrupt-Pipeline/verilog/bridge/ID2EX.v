@@ -59,9 +59,9 @@ module ID2EX(clk, en, rst, RegWrite_in, RegWrite_out,
     sync_reset_reg #(.WIDTH(WIDTH)) R2_reg(clk, en, RST, R2_in, R2_out);
     sync_reset_reg #(.WIDTH(WIDTH)) SignImm_reg(clk, en, RST, SignImm_in, SignImm_out);
     sync_reset_reg #(.WIDTH(1)) ecall_reg(clk, en, RST, ecall_in, ecall_out);
-    sync_reset_reg #(.WIDTH(1)) CSRRCI_reg(clk, en, rst, CSRRCI_in, CSRRCI_out);
-    sync_reset_reg #(.WIDTH(1)) CSRRSI_reg(clk, en, rst, CSRRSI_in, CSRRSI_out);
-    sync_reset_reg #(.WIDTH(1)) CSRRW_reg(clk, en, rst, CSRRW_in, CSRRW_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRCI_reg(clk, en, RST, CSRRCI_in, CSRRCI_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRSI_reg(clk, en, RST, CSRRSI_in, CSRRSI_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRW_reg(clk, en, RST, CSRRW_in, CSRRW_out);
     sync_reset_reg #(.WIDTH(1)) Int_Enter_reg(clk, en, rst, Int_Enter_in, Int_Enter_out);
     sync_reset_reg #(.WIDTH(1)) uret_reg(clk, en, rst, uret_in, uret_out);
     sync_reset_reg #(.WIDTH(1)) CSRWrite_reg(clk, en, rst, CSRWrite_in, CSRWrite_out);
@@ -69,17 +69,17 @@ module ID2EX(clk, en, rst, RegWrite_in, RegWrite_out,
     sync_reset_reg #(.WIDTH(5)) zimm_reg(clk, en, rst, zimm_in, zimm_out);
     sync_reset_reg #(.WIDTH(WIDTH)) t_reg(clk, en, rst, t_in, t_out);
     sync_reset_reg #(.WIDTH(3)) IRS_reg(clk, en, rst, IRS_in, IRS_out);
-    sync_reset_reg #(.WIDTH(1)) LB_reg(clk, en, rst, LB_in, LB_out);
-    sync_reset_reg #(.WIDTH(1)) LH_reg(clk, en, rst, LH_in, LH_out);
-    sync_reset_reg #(.WIDTH(1)) LHU_reg(clk, en, rst, LHU_in, LHU_out);
-    sync_reset_reg #(.WIDTH(1)) BLT_reg(clk, en, rst, BLT_in, BLT_out);
-    sync_reset_reg #(.WIDTH(1)) BGE_reg(clk, en, rst, BGE_in, BGE_out);
-    sync_reset_reg #(.WIDTH(1)) BGEU_reg(clk, en, rst, BGEU_in, BGEU_out);
-    sync_reset_reg #(.WIDTH(1)) SB_reg(clk, en, rst, SB_in, SB_out);
-    sync_reset_reg #(.WIDTH(1)) SH_reg(clk, en, rst, SH_in, SH_out);
-    sync_reset_reg #(.WIDTH(1)) AUIPC_reg(clk, en, rst, AUIPC_in, AUIPC_out);
-    sync_reset_reg #(.WIDTH(1)) CSRRC_reg(clk, en, rst, CSRRC_in, CSRRC_out);
-    sync_reset_reg #(.WIDTH(1)) CSRRS_reg(clk, en, rst, CSRRS_in, CSRRS_out);
-    sync_reset_reg #(.WIDTH(1)) CSRRWI_reg(clk, en, rst, CSRRWI_in, CSRRWI_out);
+    sync_reset_reg #(.WIDTH(1)) LB_reg(clk, en, RST, LB_in, LB_out);
+    sync_reset_reg #(.WIDTH(1)) LH_reg(clk, en, RST, LH_in, LH_out);
+    sync_reset_reg #(.WIDTH(1)) LHU_reg(clk, en, RST, LHU_in, LHU_out);
+    sync_reset_reg #(.WIDTH(1)) BLT_reg(clk, en, RST, BLT_in, BLT_out);
+    sync_reset_reg #(.WIDTH(1)) BGE_reg(clk, en, RST, BGE_in, BGE_out);
+    sync_reset_reg #(.WIDTH(1)) BGEU_reg(clk, en, RST, BGEU_in, BGEU_out);
+    sync_reset_reg #(.WIDTH(1)) SB_reg(clk, en, RST, SB_in, SB_out);
+    sync_reset_reg #(.WIDTH(1)) SH_reg(clk, en, RST, SH_in, SH_out);
+    sync_reset_reg #(.WIDTH(1)) AUIPC_reg(clk, en, RST, AUIPC_in, AUIPC_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRC_reg(clk, en, RST, CSRRC_in, CSRRC_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRS_reg(clk, en, RST, CSRRS_in, CSRRS_out);
+    sync_reset_reg #(.WIDTH(1)) CSRRWI_reg(clk, en, RST, CSRRWI_in, CSRRWI_out);
 
 endmodule

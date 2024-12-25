@@ -57,7 +57,7 @@ module interrupt_pipeline(input start,
     divider #(.N(8)) CLK_N1(start, clk, CLK_p);
     divider #(.N(125_00_000)) CLK_N5(start, clk, CLK_4_p);
     divider #(.N(100_000_000)) CLK_N6(start, clk, CLK_05_p);
-    divider #(.N(100_000)) CLK_N2(1'b1, clk, clk_n2_p);
+    divider #(.N(1)) CLK_N2(1'b1, clk, clk_n2_p);
     divider #(.N(2)) CLK_N3(1'b1, clk, clk_vga_p);
     divider #(.N(1)) CLK_N4(1'b1, clk, clk_bram_p);
     

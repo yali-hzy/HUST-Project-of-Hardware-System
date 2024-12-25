@@ -404,10 +404,10 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
     assign halt = ecall & (a7 != 'h22);
     assign LedEn = ecall & (a7 == 'h22);
 
-    register #(.WIDTH(WIDTH)) LedDataReg(clk, LedEn, rst, a0, LedData);
-    // wire [WIDTH-1:0] MockLedData;
-    // assign MockLedData = WB_PC<<16 | a0<<8 | LedEn;
-    // register #(.WIDTH(WIDTH)) LedDataReg(clk, LedEn, rst, MockLedData, LedData);
+//    register #(.WIDTH(WIDTH)) LedDataReg(clk, LedEn, rst, a0, LedData);
+     wire [WIDTH-1:0] MockLedData;
+     assign MockLedData = (IF_IR << 16) | (IF_PC & 32'h0000ffff);
+     register #(.WIDTH(WIDTH)) LedDataReg(clk, 1'b1, rst, MockLedData, LedData);
 
     wire GoRegRst, GoRegData;
     assign GoRegRst = !ecall | rst;

@@ -1,5 +1,5 @@
 module counter(clk, out);
-    localparam WIDTH = 3;
+    parameter WIDTH = 3;
     input clk;                    
     output [WIDTH-1:0] out;
     reg [WIDTH-1:0] tmp_out = 0;             

@@ -24,7 +24,7 @@ module interrupt_pipeline_tb(
   reg rawclk = 1;
 
   initial begin
-    GO = 0;
+    GO = 1;
     clk = 1;
     rawclk = 1;
     IRQ = 3'b000;
@@ -42,18 +42,18 @@ module interrupt_pipeline_tb(
   
   wire [WIDTH-1:0] clocks;
 
-  counter #(.WIDTH(32)) Counter(clk, clocks);
+//  counter #(.WIDTH(32)) Counter(clk, clocks);
 
   reg [3:0] BTN;
 
-  always @(negedge clk) begin
-    BTN[0] <= (clocks == 'h0010 || clocks == 'h0014) ? 1 : 0;
-    BTN[1] <= 0;
-    BTN[2] <= 0;
-    BTN[3] <= 0;
-    // IRQ[1] <= (clocks == 'h0004) ? 1 : 0;
-    // IRQ[2] <= (clocks == 'h0007 || clocks == 'h0241) ? 1 : 0;
-  end
+//  always @(negedge clk) begin
+//    BTN[0] <= (clocks == 'h0010 || clocks == 'h0014) ? 1 : 0;
+//    BTN[1] <= 0;
+//    BTN[2] <= 0;
+//    BTN[3] <= 0;
+//    // IRQ[1] <= (clocks == 'h0004) ? 1 : 0;
+//    // IRQ[2] <= (clocks == 'h0007 || clocks == 'h0241) ? 1 : 0;
+//  end
 
   cpu #(.WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) CPU_tb(rst, clk, GO, LedData, IRQ, IRW
   , dispAddr, dispColor, rawclk

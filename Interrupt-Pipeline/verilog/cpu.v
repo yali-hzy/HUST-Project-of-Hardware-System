@@ -406,7 +406,7 @@ module cpu (rst, clk, GO, LedData, BTN, IRW
 
 //    register #(.WIDTH(WIDTH)) LedDataReg(clk, LedEn, rst, a0, LedData);
      wire [WIDTH-1:0] MockLedData;
-     assign MockLedData = (IF_IR << 16) | (IF_PC & 32'h0000ffff);
+     assign MockLedData = ((EX_PC)<<16) | (a0 & 32'h0000ffff);
      register #(.WIDTH(WIDTH)) LedDataReg(clk, 1'b1, rst, MockLedData, LedData);
 
     wire GoRegRst, GoRegData;

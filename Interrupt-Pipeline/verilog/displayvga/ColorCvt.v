@@ -25,14 +25,18 @@ module ColorCvt(colorId, color);
     output [11:0] color;
     reg [11:0] tmp_color;
     always @* case (colorId)
-        0: tmp_color = 'h444;
-        1: tmp_color = 'hccc;
-        2: tmp_color = 'h0f0;
-        3: tmp_color = 'h0c0;
-        4: tmp_color = 'hff0;
-        5: tmp_color = 'hdd0;
-        6: tmp_color = 'hf00;
-        7: tmp_color = 'hd00;
+        0: tmp_color = 'hfff;
+        1: tmp_color = 'hfcc;
+        2: tmp_color = 'hcfc;
+        3: tmp_color = 'hccf;
+        4: tmp_color = 'hffc;
+        5: tmp_color = 'h6cf;
+        6: tmp_color = 'hcff;
+        7: tmp_color = 'hfff;
+        8: tmp_color = 'hccc;
+        9: tmp_color = 'hc88;
+        10: tmp_color = 'h8c8;
+        11: tmp_color = 'h88c;
         default: tmp_color = 'h111;
     endcase
     assign color = tmp_color;

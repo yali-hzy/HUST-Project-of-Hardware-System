@@ -13,7 +13,7 @@ module interrupt_pipeline(input start,
     output VGA_HS,
     output VGA_VS,
     input flip,
-    input sel
+    input [1:0] sel
 );
     
     // input start;
@@ -33,10 +33,14 @@ module interrupt_pipeline(input start,
     
     
     wire CLK_p;
+    wire CLK_05_p;
+    wire CLK_4_p;
     wire clk_n2_p;
     wire clk_vga_p;
     wire clk_bram_p;
     wire CLK;
+    wire CLK_05;
+    wire CLK_4;
     wire clk_n2;
     wire clk_vga;
     wire clk_bram;
@@ -51,6 +55,8 @@ module interrupt_pipeline(input start,
     
     
     divider #(.N(8)) CLK_N1(start, clk, CLK_p);
+    divider #(.N(125_00_000)) CLK_N5(start, clk, CLK_4_p);
+    divider #(.N(100_000_000)) CLK_N6(start, clk, CLK_05_p);
     divider #(.N(100_000)) CLK_N2(1'b1, clk, clk_n2_p);
     divider #(.N(2)) CLK_N3(1'b1, clk, clk_vga_p);
     divider #(.N(1)) CLK_N4(1'b1, clk, clk_bram_p);
@@ -67,7 +73,10 @@ module interrupt_pipeline(input start,
     assign clk_n2 = clk_n2_p;
     assign clk_vga = clk_vga_p;
     assign clk_bram = clk_bram_p;
-    assign True_cpu_clk = sel ? flip : CLK_p;
+    assign CLK_4 = CLK_4_p;
+    assign CLK_05 = CLK_05_p;
+//    assign True_cpu_clk = sel ? flip : CLK_p;
+    mux41 #(.DATA_WIDTH(1))mux(CLK, CLK_4, flip, CLK_05, sel, True_cpu_clk);
     cpu #(.WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) CPU(rst, True_cpu_clk, GO, LedData, BTN, IRW
     , dispAddr, dispColor, clk_bram
     );

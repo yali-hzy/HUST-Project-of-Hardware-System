@@ -22,7 +22,7 @@
 
 module GetScreenRam(rst, x, y, addr, data, color);
     parameter SCREEN_WIDTH = 11;
-    parameter ADDR_WIDTH = 25;
+    parameter ADDR_WIDTH = 16;
     parameter DATA_WIDTH = 32;
     
     input rst;

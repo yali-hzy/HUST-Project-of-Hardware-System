@@ -54,10 +54,10 @@ module interrupt_pipeline(input start,
     wire [WIDTH-1:0] dispColor;
     
     
-    divider #(.N(8)) CLK_N1(start, clk, CLK_p);
+    divider #(.N(2)) CLK_N1(start, clk, CLK_p);
     divider #(.N(125_00_000)) CLK_N5(start, clk, CLK_4_p);
     divider #(.N(100_000_000)) CLK_N6(start, clk, CLK_05_p);
-    divider #(.N(1)) CLK_N2(1'b1, clk, clk_n2_p);
+    divider #(.N(50_000)) CLK_N2(1'b1, clk, clk_n2_p);
     divider #(.N(2)) CLK_N3(1'b1, clk, clk_vga_p);
     divider #(.N(1)) CLK_N4(1'b1, clk, clk_bram_p);
     
@@ -72,7 +72,7 @@ module interrupt_pipeline(input start,
     assign CLK = CLK_p;
     assign clk_n2 = clk_n2_p;
     assign clk_vga = clk_vga_p;
-    assign clk_bram = clk_bram_p;
+    assign clk_bram = !clk_bram_p;
     assign CLK_4 = CLK_4_p;
     assign CLK_05 = CLK_05_p;
 //    assign True_cpu_clk = sel ? flip : CLK_p;

@@ -17,14 +17,17 @@ SECTIONS
     . = VGA_BASE;
     video_memory_start = .;
     . = DATA_BASE;
+    . = ALIGN(4);
     .rodata : {
         *(.rodata .rodata.*)
         *(.srodata .srodata.*)
     }
+    . = ALIGN(4);
     .data : {
         *(.data .data.*)
         *(.sdata .sdata.*)
     }
+    . = ALIGN(4);
     .bss : {
         *(.bss.stack)
         *(.bss .bss.*)

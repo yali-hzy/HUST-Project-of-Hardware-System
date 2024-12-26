@@ -8,4 +8,6 @@ edition = "2021"
 
 [dependencies]
 sdl2 = { version = "0.37.0", features = ["bundled"] }
-game = { path = "../game" }
+game = { path = "../game", features = ["print"] }
+
+[features]

@@ -7,6 +7,7 @@ use render::draw_chess;
 // use render::D;
 
 mod render;
+mod sync;
 
 #[allow(dead_code)]
 const WIDTH: usize = 488;
@@ -18,7 +19,7 @@ pub trait Painter {
     fn set_color(&mut self, color: u8);
 }
 
-static mut POS: (usize, usize) = (0, 0);
+static _POS: sync::UPSafeCell<(usize, usize)> = sync::UPSafeCell::new((0, 0));
 
 pub fn init(painter: &mut impl Painter) {
     draw_chess(painter);

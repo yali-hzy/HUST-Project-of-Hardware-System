@@ -37,7 +37,7 @@ def convert_bin_to_hex(bin_file, hex_file):
                 bytes = f.read(4)
 
                 count += 4
-                if count >= 0x20000:
+                if count >= 0x40000:
                     break
 
         with open(hex_file + "_ram0.coe", "w") as ram0:
@@ -54,14 +54,14 @@ def convert_bin_to_hex(bin_file, hex_file):
                         ram3.write("MEMORY_INITIALIZATION_VECTOR=\n")
 
                         while bytes:
-                            # Little endian
-                            bytes = bytes[::-1]
                             # for byte in bytes:
                             ram0.write("{:02X},\n".format(bytes[0]))
                             ram1.write("{:02X},\n".format(bytes[1]))
                             ram2.write("{:02X},\n".format(bytes[2]))
                             ram3.write("{:02X},\n".format(bytes[3]))
                             bytes = f.read(4)
+                            if len(bytes) != 4:
+                                break
 
         print("Convert {} bytes from {} to {}".format(count, bin_file, hex_file))
 

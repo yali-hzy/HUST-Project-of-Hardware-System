@@ -1,2 +1,4 @@
 /target
 *.dump
+*.coe
+.gdb_history

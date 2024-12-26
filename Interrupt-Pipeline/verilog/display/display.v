@@ -7,7 +7,7 @@ module display(clk, LedData, SEG, AN);
     wire [2:0] cnt;
     
     
-    counter #(.WIDTH(3))CNT(clk, cnt);
+    counter CNT(clk, cnt);
     decoder3_8 de3_8(.num(cnt), .sel(AN));
     
     wire [3:0] digits [7:0];

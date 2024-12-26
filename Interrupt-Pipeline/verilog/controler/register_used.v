@@ -55,6 +55,8 @@ module register_used (OP_CODE, Funct, R1_Used, R2_Used);
             'h1C: begin
                 if (Funct == 5'b00000) R1_Used = 1; // ecall
                 else if (Funct[2:0] == 3'b001) R1_Used = 1; // csrrw
+                else if (Funct[2:0] == 3'b010) R1_Used = 1; // csrrs
+                else if (Funct[2:0] == 3'b011) R1_Used = 1; // csrrc
                 else R1_Used = 0;
             end
             'h18: begin

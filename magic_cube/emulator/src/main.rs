@@ -12,24 +12,20 @@ const HEIGHT: u32 = 280;
 
 struct SDL2Painter<'a> {
     texture: sdl2::render::Texture<'a>,
-    r: u8,
-    g: u8,
-    b: u8,
+    pixel_color_data: [u8; 2],
 }
 
 impl<'a> Painter for SDL2Painter<'a> {
     fn draw(&mut self, x: usize, y: usize) {
+        assert!((x < (WIDTH) as usize));
+        assert!((y < (HEIGHT) as usize));
         self.texture
             .update(
                 Rect::new(x as i32, y as i32, 1, 1),
-                &[self.b, self.g, self.r, 255],
-                4,
+                &self.pixel_color_data,
+                2,
             )
             .unwrap();
-        // println!(
-        //     "draw: {}, {}, r: {}, g: {}, b: {}",
-        //     x, y, self.r, self.g, self.b
-        // );
     }
 
     fn set_color(&mut self, color: u8) {
@@ -48,9 +44,11 @@ impl<'a> Painter for SDL2Painter<'a> {
             11 => (128, 128, 192),
             _ => panic!("Invalid color"),
         };
-        self.r = r;
-        self.g = g;
-        self.b = b;
+        let r = r >> 4;
+        let g = g >> 4;
+        let b = b >> 4;
+        self.pixel_color_data[0] = (g << 4) | (b);
+        self.pixel_color_data[1] = (0xf << 4) | (r);
     }
 }
 
@@ -77,15 +75,13 @@ pub fn main() {
     // 创建一个纹理
     let texture_creator = canvas.texture_creator();
     let texture = texture_creator
-        .create_texture_streaming(PixelFormatEnum::ARGB8888, WIDTH, HEIGHT)
+        .create_texture_streaming(PixelFormatEnum::ARGB4444, WIDTH, HEIGHT)
         .map_err(|e| e.to_string())
         .unwrap();
 
     let mut painter = SDL2Painter {
         texture,
-        r: 0,
-        g: 0,
-        b: 0,
+        pixel_color_data: [0, 0],
     };
 
     game::init(&mut painter);
@@ -101,17 +97,14 @@ pub fn main() {
                     }
                     Some(Keycode::A) => {
                         println!("A");
-
                         handle_left(&mut painter);
                     }
                     Some(Keycode::S) => {
                         println!("S");
-
                         handle_down(&mut painter);
                     }
                     Some(Keycode::D) => {
                         println!("D");
-
                         handle_right(&mut painter);
                     }
                     _ => {}

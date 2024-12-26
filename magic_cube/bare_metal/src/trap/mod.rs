@@ -14,9 +14,13 @@
 
 use core::arch::global_asm;
 
+use game::{handle_down, handle_left, handle_right, handle_up};
 use riscv::register::mcause;
 
-use crate::console::{pause, print};
+use crate::{
+    console::{pause, print},
+    vga::get_vga,
+};
 
 global_asm!(include_str!("trap.s"));
 
@@ -28,6 +32,7 @@ extern "C" {
 /// Make rustc happy (reserve .text.trampoline section)
 pub fn init() {
     print(__alltraps as usize);
+    pause();
 }
 
 /// handle an interrupt, exception, or system call from user space
@@ -35,12 +40,32 @@ pub fn init() {
 pub fn trap_handler() {
     let mcause = mcause::read().bits();
     match mcause {
-        // 0..=3 => {
-        //     handle_input(mcause);
-        // }
+        0..=3 => {
+            handle_input(mcause);
+        }
         _ => {
-            print(mcause);
+            print(mcause << 16 | 0xdead);
             pause();
+        }
+    }
+}
+
+fn handle_input(mcause: usize) {
+    match mcause {
+        0 => {
+            handle_up(get_vga());
+        }
+        1 => {
+            handle_left(get_vga());
+        }
+        2 => {
+            handle_right(get_vga());
+        }
+        3 => {
+            handle_down(get_vga());
+        }
+        _ => {
+            panic!()
         }
     }
 }

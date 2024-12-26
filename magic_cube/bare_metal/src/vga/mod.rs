@@ -1,5 +1,3 @@
-use core::arch::asm;
-
 use game::Painter;
 
 use crate::console::{pause, print};

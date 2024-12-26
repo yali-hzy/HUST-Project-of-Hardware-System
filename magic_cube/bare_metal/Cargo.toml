@@ -16,6 +16,9 @@ test = false
 doctest = false
 bench = false
 
+[features]
+disable_ecall = []
+
 
 [dependencies]
 riscv = "0.12.1"

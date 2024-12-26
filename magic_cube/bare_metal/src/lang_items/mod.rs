@@ -1,9 +1,12 @@
-use crate::console::{pause, print};
+use crate::console::print;
 
 #[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    let x = info
+        .location()
+        .map(|loc| (loc.line() << 8) | (loc.column()))
+        .unwrap_or(0xdeadbeef);
     loop {
-        print(0xFFFFFFFF);
-        pause();
+        print(x as usize);
     }
 }

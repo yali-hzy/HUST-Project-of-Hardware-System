@@ -1,9 +1,9 @@
 OUTPUT_ARCH(riscv32i)
 ENTRY(_start)
-BASE_ADDRESS = 0x0;
-TRAP_ADDRESS = 0x30;
-VGA_BASE = 0x40000;
-DATA_BASE = 0x50AE0;
+BASE_ADDRESS = 0x80200000;
+TRAP_ADDRESS = BASE_ADDRESS + 0x30;
+VGA_BASE = BASE_ADDRESS + 0x40000;
+DATA_BASE = BASE_ADDRESS + 0x50AE0;
 
 SECTIONS
 {
@@ -17,14 +17,17 @@ SECTIONS
     . = VGA_BASE;
     video_memory_start = .;
     . = DATA_BASE;
+    . = ALIGN(4);
     .rodata : {
         *(.rodata .rodata.*)
         *(.srodata .srodata.*)
     }
+    . = ALIGN(4);
     .data : {
         *(.data .data.*)
         *(.sdata .sdata.*)
     }
+    . = ALIGN(4);
     .bss : {
         *(.bss.stack)
         *(.bss .bss.*)

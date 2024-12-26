@@ -1,5 +1,6 @@
-use crate::Painter;
+use crate::{sync::UPSafeCell, Painter};
 use core::ops::Add;
+
 
 const NUMWIDTH: usize = 16;
 const NUMHEIGHT: usize = 12;
@@ -7,6 +8,8 @@ const CUBEWIDTH: usize = 66;
 const CUBEHEIGHT: usize = 63;
 const PICWIDTH: usize = 488;
 const PICHEIGHT: usize = 280;
+const CUBENUM: usize = 3;
+
 
 #[derive(Copy, Clone)]
 enum Color {
@@ -626,6 +629,16 @@ struct Block {
     magic: u8,
 }
 
+
+static BLOCKS: UPSafeCell <[Block; 64]> = UPSafeCell::new([Block {
+    cube: None,
+    magic: 0,
+}; 64]);
+
+static CUBE_LIST: UPSafeCell<[u8; 15]> = UPSafeCell::new([1, 63, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]);
+
+static USING_CUBE: UPSafeCell<u8> = UPSafeCell::new(0);
+
 fn draw_border_line(painter: &mut impl Painter, p: Pos) {
     for i in 0..3 {
         for j in 0..6 {
@@ -754,24 +767,24 @@ fn recover_to_background(painter: &mut impl Painter,p : Pos) {
     }
 }
 
+pub fn W(painter: &mut impl Painter) {
+
+    let uc: u8 = USING_CUBE.as_mut().clone();
+    *USING_CUBE.as_mut() = (1 - uc) as u8;
+    
+    let cube = (BLOCKS.as_mut())[(CUBE_LIST.as_mut())[uc as usize] as usize].cube.unwrap();
+
+    (BLOCKS.as_mut())[3].cube = Some(cube);
+    (BLOCKS.as_mut())[0].cube = None;
+}
+
+pub fn __ini__() {
 
 
-pub fn draw_chess(painter: &mut impl Painter) {
-    painter.set_color(Color::Background as u8);
+    (BLOCKS.as_mut())[15].magic = 1;
 
-    for i in 0..PICHEIGHT {
-        for j in 0..PICWIDTH {
-            painter.draw(j, i);
-        }
-    }
-    let mut block: [Block; 64] = [Block {
-        cube: None,
-        magic: 0,
-    }; 64];
-
-    block[34].magic = 1;
-    block[35].magic = 2;
-    block[0].cube = Some(Cube {
+    (BLOCKS.as_mut())[35].magic = 2;
+    (BLOCKS.as_mut())[0].cube = Some(Cube {
         up: 1,
         down: 5,
         left: 3,
@@ -780,7 +793,7 @@ pub fn draw_chess(painter: &mut impl Painter) {
         back: 6,
         style: 0,
     });
-    block[63].cube = Some(Cube {
+    (BLOCKS.as_mut())[63].cube = Some(Cube {
         up: 1,
         down: 5,
         left: 3,
@@ -790,7 +803,7 @@ pub fn draw_chess(painter: &mut impl Painter) {
         style: 1,
     });
 
-    block[1].cube = Some(Cube {
+    (BLOCKS.as_mut())[1].cube = Some(Cube {
         up: 1,
         down: 5,
         left: 3,
@@ -799,23 +812,58 @@ pub fn draw_chess(painter: &mut impl Painter) {
         back: 6,
         style: 2,
     });
+}
 
+pub fn draw_chess(painter: &mut impl Painter) {
 
-    let cube_list: [u8; 10] = [0, 63, 1, 100, 100, 100, 100, 100, 100, 100];
+    painter.set_color(Color::Background as u8);
 
-    for i in 0..64 {
-        if let None = block[i].cube {
-            draw_border(painter, &block[i], BLOCK_POS[i]);
+    for i in 0..PICHEIGHT {
+        for j in 0..PICWIDTH {
+            painter.draw(j, i);
         }
     }
 
-    for i in 0..10 {
-        let cp = cube_list[i] as usize;
-        if cp == 100 {
-            break;
+    for (i, block) in (BLOCKS.as_mut()).iter().enumerate() {
+
+        if let None = block.cube {
+            draw_border(painter, &block, BLOCK_POS[i]);
         }
-        if let Some(cube) = block[cp].cube {
-            draw_cube(painter, BLOCK_POS[cp], &cube);
+    }
+
+    let mut close_cube: u8 = 65;
+    let mut used_cube: u8 = 0;
+
+    for i in 0..CUBENUM{
+        for &j in CUBE_LIST.as_mut().iter(){
+            if j == 100 {
+                break;
+            }
+            if (j > used_cube || (j == used_cube && used_cube == 0)) && j < close_cube {
+                close_cube = j;
+            }
         }
+        used_cube = close_cube;
+        if let Some(cube) = (BLOCKS.as_mut())[close_cube as usize].cube {
+            draw_cube(painter, BLOCK_POS[close_cube as usize], &cube);
+        }
+        close_cube = 65;
+    }
+}
+fn main(){
+    for i in 0..CUBENUM{
+        for &j in CUBE_LIST.as_mut().iter(){
+            if j == 100 {
+                break;
+            }
+            if (j > used_cube || (j == used_cube && used_cube == 0)) && j < close_cube {
+                close_cube = j;
+            }
+        }
+        used_cube = close_cube;
+        if let Some(cube) = (BLOCKS.as_mut())[close_cube as usize].cube {
+            draw_cube(painter, BLOCK_POS[close_cube as usize], &cube);
+        }
+        close_cube = 65;
     }
 }

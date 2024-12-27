@@ -1,7 +1,6 @@
 #![no_std]
 
-use render::{__ini__, draw_chess};
-use render::W;
+use render::{__ini__, draw_chess, response_call};
 // use render::A;
 // use render::S;
 // use render::D;
@@ -32,15 +31,24 @@ pub fn init(painter: &mut impl Painter) {
 
 #[allow(dead_code)]
 pub fn handle_up(painter: &mut impl Painter) {
-    W(painter);
+    response_call(painter, -15, 30);
     draw_chess(painter);
 }
 
 #[allow(dead_code)]
-pub fn handle_down(painter: &mut impl Painter) {}
+pub fn handle_down(painter: &mut impl Painter) {
+    response_call(painter, 15, -30);
+    draw_chess(painter);
+}
 
 #[allow(dead_code)]
-pub fn handle_left(painter: &mut impl Painter) {}
+pub fn handle_left(painter: &mut impl Painter) {
+    response_call(painter, -15, -30);
+    draw_chess(painter);
+}
 
 #[allow(dead_code)]
-pub fn handle_right(painter: &mut impl Painter) {}
+pub fn handle_right(painter: &mut impl Painter) {
+    response_call(painter, 15, 30);
+    draw_chess(painter);
+}

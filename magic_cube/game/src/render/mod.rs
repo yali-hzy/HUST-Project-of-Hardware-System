@@ -1,5 +1,5 @@
-use crate::{sync::UPSafeCell, Painter};
-use core::ops::Add;
+use crate::{println, sync::UPSafeCell, Painter};
+use core:: ops::Add;
 
 
 const NUMWIDTH: usize = 16;
@@ -212,7 +212,7 @@ static NUM_PIX: [[[u8; 12]; 16]; 10] = [
 ];
 
 #[derive(Copy, Clone)]
-struct Pos {
+pub struct Pos {
     x: i16,
     y: i16,
 }
@@ -635,7 +635,7 @@ static BLOCKS: UPSafeCell <[Block; 64]> = UPSafeCell::new([Block {
     magic: 0,
 }; 64]);
 
-static CUBE_LIST: UPSafeCell<[u8; 15]> = UPSafeCell::new([1, 63, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]);
+static CUBE_LIST: UPSafeCell<[u8; CUBENUM]> = UPSafeCell::new([0, 63, 1]);
 
 static USING_CUBE: UPSafeCell<u8> = UPSafeCell::new(0);
 
@@ -746,37 +746,151 @@ fn draw_cube(painter: &mut impl Painter, p: Pos, cube: &Cube) {
     }
 }
 
+fn min(a: u8, b: u8) -> u8 {
+    return if a < b { a } else { b };
+}
 
 //先把逻辑计算完
 //重画所有方块旁边的背景
 //方块重画
+fn magic_effect(magic: u8, num: u8) -> u8{
+    return if magic == 1 {
+        min(num + 1, 9)
+    } else if magic == 2 {
+        min(num + (num >> 1), 9)
+    }else{
+        num
+    };
+}
+
+fn change_cube(cube: &Cube, dir: Pos, magic: u8) -> Cube {
+    return 
+    if dir.x == -15 && dir.y == 30 {
+        Cube {
+            up: cube.front,
+            down: magic_effect(magic, cube.back),
+            left: cube.left,
+            right: cube.right,
+            front: cube.down,
+            back: cube.up,
+            style: 1,
+        }
+    } // A
+    else if dir.x == -15 && dir.y == -30 {
+        Cube {
+            up: cube.right,
+            down: magic_effect(magic, cube.left),
+            left: cube.up,
+            right: cube.down,
+            front: cube.front,
+            back: cube.back,
+            style: 1,
+        }
+    } // S
+    else if dir.x == 15 && dir.y == -30 {
+        Cube {
+            up: cube.back,
+            down: magic_effect(magic, cube.front),
+            left: cube.left,
+            right: cube.right,
+            front: cube.up,
+            back: cube.down,
+            style: 1,
+        }
+    } // D
+    else{
+        Cube {
+            up: cube.left,
+            down: magic_effect(magic, cube.right),
+            left: cube.down,
+            right: cube.up,
+            front: cube.front,
+            back: cube.back,
+            style: 1,
+        }
+    };
+}
 
 
-fn recover_to_background(painter: &mut impl Painter,p : Pos) {
-    painter.set_color(Color::Background as u8);
-
-    for i in 0..CUBEHEIGHT {
-        for j in 0..CUBEWIDTH {
-            if CUBE_PIX[i][j] == 1 {
-                
-                painter.draw(p.y as usize + j, p.x as usize + i);
-            } else if CUBE_PIX[i][j] == 2 {
-                painter.draw(p.y as usize + j, p.x as usize + i);
-            }
+fn pos_to_id(p: Pos) -> i8 {
+    for (iter, &pos) in BLOCK_POS.iter().enumerate() {
+        if p.x == pos.x && p.y == pos.y {
+            return iter as i8;
         }
     }
+    return -1;
 }
 
-pub fn W(painter: &mut impl Painter) {
+fn check_around(cube1: &Cube, cube2: &Cube, p1: Pos, p2: Pos) -> i8{
+    if p1.x - p2.x == 15 && p1.y - p2.y == -30{
+        if cube1.back >= cube2.front{
+            return 1;
+        }
+        return 2;
+    }else if p1.x - p2.x == 15 && p1.y - p2.y == 30{
+        if cube1.left >= cube2.right{
+            return 1;
+        }
+        return 2;
+    }else if p1.x - p2.x == -15 && p1.y - p2.y == 30{
+        if cube1.front >= cube2.back{
+            return 1;
+        }
+        return 2;
+    }else if p1.x - p2.x == -15 && p1.y - p2.y == -30{
+        if cube1.right >= cube2.left{
+            return 1;
+        }
+        return 2;
+    }
+    return 0;
+}
 
-    let uc: u8 = USING_CUBE.as_mut().clone();
-    *USING_CUBE.as_mut() = (1 - uc) as u8;
+pub fn response_call(painter: &mut impl Painter, dirx: i16, diry: i16) {
+
+    let dir = Pos{x: dirx, y: diry};
+
+    let uc = USING_CUBE.as_mut().clone();
+    *USING_CUBE.as_mut() = 1 - uc;
+
+    let origin_id = CUBE_LIST.as_mut()[uc as usize] as i8;
+    let origin_p = BLOCK_POS[origin_id as usize];
+    let origin_cube = (BLOCKS.as_mut())[origin_id as usize].cube.unwrap();
+
+    let move_p = Pos{x: origin_p.x + dir.x, y: origin_p.y + dir.y};
+    let move_id = pos_to_id(move_p);
+
+    let not_use_id = CUBE_LIST.as_mut()[1 - uc as usize] as usize;
+
+    BLOCKS.as_mut()[not_use_id].cube.as_mut().unwrap().style = 0;
+    BLOCKS.as_mut()[origin_id as usize].cube.as_mut().unwrap().style = 1;
     
-    let cube = (BLOCKS.as_mut())[(CUBE_LIST.as_mut())[uc as usize] as usize].cube.unwrap();
+    if move_id == -1 || BLOCKS.as_mut()[move_id as usize].cube.is_some() {
+        return;
+    }
 
-    (BLOCKS.as_mut())[3].cube = Some(cube);
-    (BLOCKS.as_mut())[0].cube = None;
+    let move_cube = change_cube(&origin_cube, dir, BLOCKS.as_mut()[move_id as usize].magic);
+    BLOCKS.as_mut()[move_id as usize].magic = 0;
+
+    BLOCKS.as_mut()[origin_id as usize].cube = None;
+    BLOCKS.as_mut()[move_id as usize].cube = Some(move_cube);
+    
+    CUBE_LIST.as_mut()[uc as usize] = move_id as u8;
+
+    let result = check_around(&move_cube, 
+        &BLOCKS.as_mut()[not_use_id].cube.unwrap()
+            ,move_p, BLOCK_POS[not_use_id]);
+
+    if result == 1 {
+        BLOCKS.as_mut()[not_use_id].cube = None;
+        CUBE_LIST.as_mut()[1 - uc as usize] = 100;
+    }else if result == 2 {
+        BLOCKS.as_mut()[move_id as usize].cube = None;
+        CUBE_LIST.as_mut()[uc as usize] = 100;
+    }
+
 }
+
 
 pub fn __ini__() {
 
@@ -787,7 +901,7 @@ pub fn __ini__() {
     (BLOCKS.as_mut())[0].cube = Some(Cube {
         up: 1,
         down: 5,
-        left: 3,
+        left: 4,
         right: 3,
         front: 2,
         back: 6,
@@ -796,7 +910,7 @@ pub fn __ini__() {
     (BLOCKS.as_mut())[63].cube = Some(Cube {
         up: 1,
         down: 5,
-        left: 3,
+        left: 4,
         right: 3,
         front: 2,
         back: 6,
@@ -832,35 +946,23 @@ pub fn draw_chess(painter: &mut impl Painter) {
     }
 
     let mut close_cube: u8 = 65;
-    let mut used_cube: u8 = 0;
+    let mut used_cube: i8 = -1;
 
-    for i in 0..CUBENUM{
+
+    for _ in 0..CUBENUM{
         for &j in CUBE_LIST.as_mut().iter(){
             if j == 100 {
-                break;
+                continue;
             }
-            if (j > used_cube || (j == used_cube && used_cube == 0)) && j < close_cube {
+            if (j as i8 > used_cube) && j < close_cube {
                 close_cube = j;
             }
         }
-        used_cube = close_cube;
-        if let Some(cube) = (BLOCKS.as_mut())[close_cube as usize].cube {
-            draw_cube(painter, BLOCK_POS[close_cube as usize], &cube);
+        
+        if close_cube == 65 {
+            break;
         }
-        close_cube = 65;
-    }
-}
-fn main(){
-    for i in 0..CUBENUM{
-        for &j in CUBE_LIST.as_mut().iter(){
-            if j == 100 {
-                break;
-            }
-            if (j > used_cube || (j == used_cube && used_cube == 0)) && j < close_cube {
-                close_cube = j;
-            }
-        }
-        used_cube = close_cube;
+        used_cube = close_cube as i8;
         if let Some(cube) = (BLOCKS.as_mut())[close_cube as usize].cube {
             draw_cube(painter, BLOCK_POS[close_cube as usize], &cube);
         }

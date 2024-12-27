@@ -2,10 +2,16 @@
   EX、MEM段有写CSR，就要暂停PC,IF/ID段，清空ID/EX段
   CSRRSI, CSRRCI, CSRRW, URET, 隐指令
 */
-module cpu (rst, clk, GO, LedData, IRQ, IRW);
+module cpu (rst, clk, GO, LedData, BTN, IRW
+, dispAddr, dispColor, rawclk
+);
     parameter WIDTH = 32;
-    input rst, clk, GO;
-    input [2:0] IRQ;
+    parameter ADDR_WIDTH = 16;
+    input rst, clk, GO, rawclk;
+    input [3:0] BTN;
+    input [ADDR_WIDTH-1:0] dispAddr;
+    
+    output [WIDTH-1:0] dispColor;
     output [2:0] IRW;
     output [WIDTH-1:0] LedData;
 
@@ -22,9 +28,9 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     register #(.WIDTH(WIDTH)) PC_reg(clk, PC_en, rst, PC_next, IF_PC);
 
     wire [WIDTH-1:0] IF_IR;
-    wire [9:0] text_addr;
-    assign text_addr = IF_PC[11:2];
-    rom_text #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(10)) ROM(text_addr, IF_IR);
+    wire [ADDR_WIDTH-1:0] text_addr;
+    assign text_addr = IF_PC[1+ADDR_WIDTH:2];
+    rom_text #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) ROM(text_addr, IF_IR, rawclk);
 
     wire [WIDTH-1:0] ID_PC, ID_IR;
     wire IF2ID_en, IF2ID_rst;
@@ -38,6 +44,7 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     wire ID_MemToReg, ID_MemWrite, ID_ALU_SRC, ID_RegWrite, ID_uret, ID_ecall, S_type, ID_Beq, ID_Bne, 
         ID_Jalr, ID_JAL, ID_LUI, ID_LBU, ID_Bltu, ID_CSRRSI, ID_CSRRCI, ID_CSRRW;
     wire ID_LB, ID_LH, ID_LHU, ID_BLT, ID_BGE, ID_BGEU, ID_SB, ID_SH, ID_AUIPC;
+    wire ID_CSRRC, ID_CSRRS, ID_CSRRWI;
     wire [3:0] ID_ALU_OP;
     wire R1_Used, R2_Used;
 
@@ -51,16 +58,25 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         ID_MemToReg, ID_MemWrite, ID_ALU_SRC, ID_RegWrite, ID_uret, ID_ecall, S_type, ID_Beq, ID_Bne, 
         ID_Jalr, ID_JAL, ID_LUI, ID_LBU, ID_Bltu, ID_CSRRSI, ID_CSRRCI, ID_CSRRW,
         R1_Used, R2_Used,
-        ID_LB, ID_LH, ID_LHU, ID_BLT, ID_BGE, ID_BGEU, ID_SB, ID_SH, ID_AUIPC);
+        ID_LB, ID_LH, ID_LHU, ID_BLT, ID_BGE, ID_BGEU, ID_SB, ID_SH, ID_AUIPC, 
+        ID_CSRRC, ID_CSRRS, ID_CSRRWI);
+
+    wire [2:0] IRQ;
+    wire [1:0] IRQ_data [0:2];
+
+    priority_encoder42 btn_irq(.x0(BTN[0]), .x1(BTN[1]), .x2(BTN[2]), .x3(BTN[3]), .y(IRQ_data[0]), .sel(IRQ[0]));
 
     wire [2:0] IR, IRS, IP, WB_IRS;
     wire IE, WB_IEWriteData, WB_IEWrite, WB_EPCWrite, WB_uret;
+    wire WB_CAUSEWrite;
     wire [WIDTH-1:0] EPC, WB_EPCWriteData;
+    wire [WIDTH-1:0] CAUSE, WB_CAUSEWriteData;
     reg [2:0] WB_IRSWriteData;
     ir Ir(.clk(clk), .rst(rst), .IRQ(IRQ), .Clr(WB_uret), .ClrInt(WB_IRS), .IR(IR), .IRW(IRW));
     ie Ie(.clk(!clk), .rst(rst), .we(WB_IEWrite), .dataIn(WB_IEWriteData), .IE(IE));
     irs Irs(.clk(!clk), .rst(rst), .we(WB_INT), .dataIn(WB_IRSWriteData), .IRS(IRS)); // WB后有效，中断隐指令 和 uret 写 IRS
     epc Epc(.clk(!clk), .rst(rst), .we(WB_EPCWrite), .dataIn(WB_EPCWriteData), .EPC(EPC));
+    cause Cause(.clk(!clk), .rst(rst), .we(WB_CAUSEWrite), .dataIn(WB_CAUSEWriteData), .CAUSE(CAUSE));
     ip Ip(.clk(!clk), .rst(rst), .we(WB_INT), .IRS(WB_IRS), .IP(IP)); // 中断隐指令 和 uret 写 IP
     /*
         有写CSR的时候，保证IF,ID停止，EX,MEM段插入NOP
@@ -76,7 +92,9 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
 
     wire ID_Int_Enter, ID_CSRWrite;
     assign ID_Int_Enter = !CSR_DATA_HAZZARD && (ID_IR != 0) && IE && (pri_IR != 0) && !(IP & pri_IR);
-    assign ID_CSRWrite = ID_CSRRSI | ID_CSRRCI | ID_CSRRW | ID_uret | ID_Int_Enter;
+    wire ID_CSR_OP;
+    assign ID_CSR_OP = ID_CSRRSI | ID_CSRRCI | ID_CSRRW | ID_CSRRC | ID_CSRRS | ID_CSRRWI;
+    assign ID_CSRWrite = ID_CSR_OP | ID_uret | ID_Int_Enter;
     
     reg [2:0] ID_IRS;
     always @(*) begin
@@ -90,9 +108,10 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     assign ID_zimm = ID_IR[19:15];
 
     reg [WIDTH-1:0] ID_t;
-    always @(ID_csr, EPC, IE) begin
-        if (ID_csr == 'h041) ID_t = EPC;
-        else if (ID_csr == 'h004) ID_t = {31'b0, IE};
+    always @(*) begin
+        if (ID_csr == 'h341) ID_t = EPC;
+        else if (ID_csr == 'h304) ID_t = {31'b0, IE};
+        else if (ID_csr == 'h342) ID_t = CAUSE;
         else ID_t = 0;
     end
 
@@ -156,7 +175,11 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     wire [4:0] EX_zimm;
     wire [WIDTH-1:0] EX_t;
     wire EX_uret, EX_Int_Enter, EX_CSRRCI, EX_CSRRSI, EX_CSRRW;
+    wire EX_CSRRC, EX_CSRRS, EX_CSRRWI;
     wire [2:0] EX_IRS;
+
+    wire invalid_IR;
+    assign invalid_IR = (ID_IR[1:0] != 2'b11);
 
     ID2EX #(.WIDTH(WIDTH)) id2ex(.clk(clk), .en(Continue), .rst(id2ex_rst), 
         .RegWrite_in(ID_RegWrite), .RegWrite_out(EX_RegWrite), .WriteRegNo_in(ID_Wno), .WriteRegNo_out(EX_WriteRegNo),
@@ -177,37 +200,58 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         .LB_in(ID_LB), .LB_out(EX_LB), .LH_in(ID_LH), .LH_out(EX_LH), .LHU_in(ID_LHU), .LHU_out(EX_LHU),
         .BLT_in(ID_BLT), .BLT_out(EX_Blt), .BGE_in(ID_BGE), .BGE_out(EX_Bge), .BGEU_in(ID_BGEU), .BGEU_out(EX_Bgeu),
         .SB_in(ID_SB), .SB_out(EX_SB), .SH_in(ID_SH), .SH_out(EX_SH),
-        .AUIPC_in(ID_AUIPC), .AUIPC_out(EX_AUIPC));
+        .AUIPC_in(ID_AUIPC), .AUIPC_out(EX_AUIPC), 
+        .CSRRC_in(ID_CSRRC), .CSRRC_out(EX_CSRRC), .CSRRS_in(ID_CSRRS), .CSRRS_out(EX_CSRRS), 
+        .CSRRWI_in(ID_CSRRWI), .CSRRWI_out(EX_CSRRWI), 
+        .invalid_IR(invalid_IR));
 
     wire [WIDTH-1:0] True_R1, True_R2, MEM_ALUout;
     mux41 #(.DATA_WIDTH(WIDTH)) R1MUX(.a(EX_R1), .b(WB_Din), .c(MEM_ALUout), .d(0), .sel(FwdA), .out(True_R1));
     mux41 #(.DATA_WIDTH(WIDTH)) R2MUX(.a(EX_R2), .b(WB_Din), .c(MEM_ALUout), .d(0), .sel(FwdB), .out(True_R2));
 
     wire EX_IEWrite, EX_EPCWrite;
+    wire EX_CAUSEWrite;
     reg EX_IEWriteData;
     reg [WIDTH-1:0] EX_EPCWriteData;
+    reg [WIDTH-1:0] EX_CAUSEWriteData;
 
     reg [WIDTH-1:0] csrdatain;
     always @(*) begin
         if (EX_CSRRCI) csrdatain = EX_t & ~{27'b0,EX_zimm};
         else if (EX_CSRRSI) csrdatain = EX_t | {27'b0,EX_zimm};
         else if (EX_CSRRW) csrdatain = True_R1;
+        else if (EX_CSRRC) csrdatain = EX_t & ~True_R1;
+        else if (EX_CSRRS) csrdatain = EX_t | True_R1;
+        else if (EX_CSRRWI) csrdatain = {27'b0,EX_zimm};
         else csrdatain = 0;
     end
 
-    assign EX_IEWrite = (EX_CSRRCI || EX_CSRRSI || EX_CSRRW) && EX_csr == 'h004 || EX_uret || EX_Int_Enter;
+    wire EX_CSR_OP;
+    assign EX_CSR_OP = EX_CSRRCI | EX_CSRRSI | EX_CSRRW | EX_CSRRC | EX_CSRRS | EX_CSRRWI;
+    assign EX_IEWrite = (EX_CSR_OP) && EX_csr == 'h304 || EX_uret || EX_Int_Enter;
     always @(*) begin
-        if (EX_CSRRCI || EX_CSRRSI || EX_CSRRW) EX_IEWriteData = EX_csr == 'h004 ? csrdatain[0] : 1;
+        if (EX_Int_Enter) EX_IEWriteData = 0;
+        else if (EX_CSR_OP) EX_IEWriteData = EX_csr == 'h304 ? csrdatain[0] : 1;
         else if (EX_uret) EX_IEWriteData = 1;
-        else if (EX_Int_Enter) EX_IEWriteData = 0;
         else EX_IEWriteData = 1;
     end
 
-    assign EX_EPCWrite = (EX_CSRRCI || EX_CSRRSI || EX_CSRRW) && EX_csr == 'h041 || EX_Int_Enter;
+    assign EX_EPCWrite = (EX_CSR_OP) && EX_csr == 'h341 || EX_Int_Enter;
     always @(*) begin
-        if (EX_CSRRCI || EX_CSRRSI || EX_CSRRW) EX_EPCWriteData = EX_csr == 'h041 ? csrdatain : 0;
-        else if (EX_Int_Enter) EX_EPCWriteData = EX_PC;
+        if (EX_Int_Enter) EX_EPCWriteData = EX_PC;
+        else if (EX_CSR_OP) EX_EPCWriteData = EX_csr == 'h341 ? csrdatain : 0;
         else EX_EPCWriteData = 0;
+    end
+
+    assign EX_CAUSEWrite = (EX_CSR_OP) && EX_csr == 'h342 || EX_Int_Enter;
+    always @(*) begin
+        if (EX_Int_Enter) begin
+            if (EX_IRS == 3'b001) EX_CAUSEWriteData = {30'b0, IRQ_data[0]};
+            else if (EX_IRS == 3'b010) EX_CAUSEWriteData = 0; //TODO
+            else EX_CAUSEWriteData = 0; //TODO
+        end
+        else if (EX_CSR_OP) EX_CAUSEWriteData = EX_csr == 'h342 ? csrdatain : 0;
+        else EX_CAUSEWriteData = 0;
     end
 
     wire [WIDTH-1:0] EX_a0, EX_a7;
@@ -233,22 +277,22 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         if (EX_LUI) EX_ALUResult = EX_SignImm;
         else if (EX_AUIPC) EX_ALUResult = EX_PC + EX_SignImm;
         else if (EX_J) EX_ALUResult = EX_PC + 4;
-        else if (EX_CSRRCI || EX_CSRRSI || EX_CSRRW) EX_ALUResult = EX_t;
+        else if (EX_CSR_OP) EX_ALUResult = EX_t;
         else EX_ALUResult = ALUout;
     end
 
     always @(EX_Jalr, ALUout, BranchTaken, IF_PC, EX_SignImm, EX_PC, WB_uret, WB_Int_Enter, WB_IRS, EPC) begin
-        if (EX_Jalr) PC_next = ALUout & 'hFFFFFFFE;
-        else if (BranchTaken) PC_next = EX_SignImm + EX_PC;
-        else if (WB_uret) PC_next = EPC;
-        else if (WB_Int_Enter) begin
+         if (WB_Int_Enter) begin
             case (WB_IRS) 
-                3'b001: PC_next = 'h000030AC;
+                3'b001: PC_next = 'h00000030;
                 3'b010: PC_next = 'h00003170;
                 3'b100: PC_next = 'h00003234;
                 default: PC_next = IF_PC + 4;
             endcase
         end
+        else if (EX_Jalr) PC_next = ALUout & 'hFFFFFFFE;
+        else if (BranchTaken) PC_next = EX_SignImm + EX_PC;
+        else if (WB_uret) PC_next = EPC;
         else PC_next = IF_PC + 4;
     end
 
@@ -258,6 +302,8 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     wire [WIDTH-1:0] MEM_PC, MEM_IR, MEM_a0, MEM_a7;
     wire MEM_uret, MEM_Int_Enter, MEM_IEWrite, MEM_EPCWrite, MEM_IEWriteData;
     wire [WIDTH-1:0] MEM_EPCWriteData;
+    wire MEM_CAUSEWrite;
+    wire [WIDTH-1:0] MEM_CAUSEWriteData;
     wire [2:0] MEM_IRS;
 
     EX2MEM #(.WIDTH(WIDTH)) ex2mem(.clk(clk), .en(Continue), .rst(rst), 
@@ -273,11 +319,13 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         .EPCWriteData_in(EX_EPCWriteData), .EPCWriteData_out(MEM_EPCWriteData), 
         .IRS_in(EX_IRS), .IRS_out(MEM_IRS), 
         .LB_in(EX_LB), .LB_out(MEM_LB), .LH_in(EX_LH), .LH_out(MEM_LH), .LHU_in(EX_LHU), .LHU_out(MEM_LHU),
-        .SB_in(EX_SB), .SB_out(MEM_SB), .SH_in(EX_SH), .SH_out(MEM_SH));
+        .SB_in(EX_SB), .SB_out(MEM_SB), .SH_in(EX_SH), .SH_out(MEM_SH), 
+        .CAUSEWrite_in(EX_CAUSEWrite), .CAUSEWrite_out(MEM_CAUSEWrite), 
+        .CAUSEWriteData_in(EX_CAUSEWriteData), .CAUSEWriteData_out(MEM_CAUSEWriteData));
 
     wire [WIDTH-1:0] MemData;
-    wire [9:0] MemData_addr;
-    assign MemData_addr = MEM_ALUout[11:2];
+    wire [ADDR_WIDTH-1:0] MemData_addr;
+    assign MemData_addr = MEM_ALUout[1+ADDR_WIDTH:2];
     reg [3:0] ram_sel;
 
     always @(*) begin
@@ -293,8 +341,17 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         end
         else ram_sel = 4'b1111;
     end
+    
+    
 
-    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(10)) RAM(.rst(rst), .clk(clk), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData));
+    ram #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) RAM(.rst(rst), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData)
+    , .dispAddr(dispAddr), .dispColor(dispColor), .rawclk(rawclk)
+    );
+//    RegRam #(.DATA_WIDTH(WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) RAM(.rst(rst), .we(MEM_MemWrite), .sel(ram_sel), .addr(MemData_addr), .d(MEM_WriteData), .q(MemData)
+//    , .dispAddr(dispAddr), .dispColor(dispColor), .clk(clk)
+//    );
+    
+    
 
     wire [7:0] LoadByte;
     wire [7:0] MemDataByte0, MemDataByte1, MemDataByte2, MemDataByte3;
@@ -331,7 +388,9 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
         .IEWrite_in(MEM_IEWrite), .IEWrite_out(WB_IEWrite), .EPCWrite_in(MEM_EPCWrite), .EPCWrite_out(WB_EPCWrite), 
         .IEWriteData_in(MEM_IEWriteData), .IEWriteData_out(WB_IEWriteData),
         .EPCWriteData_in(MEM_EPCWriteData), .EPCWriteData_out(WB_EPCWriteData), 
-        .IRS_in(MEM_IRS), .IRS_out(WB_IRS));
+        .IRS_in(MEM_IRS), .IRS_out(WB_IRS), 
+        .CAUSEWrite_in(MEM_CAUSEWrite), .CAUSEWrite_out(WB_CAUSEWrite),
+        .CAUSEWriteData_in(MEM_CAUSEWriteData), .CAUSEWriteData_out(WB_CAUSEWriteData));
 
     assign WB_Din = WB_MemToReg ? WB_MemData : WB_ALUResult;
 
@@ -349,13 +408,16 @@ module cpu (rst, clk, GO, LedData, IRQ, IRW);
     assign halt = ecall & (a7 != 'h22);
     assign LedEn = ecall & (a7 == 'h22);
 
-    register #(.WIDTH(WIDTH)) LedDataReg(clk, LedEn, rst, a0, LedData);
+    register #(.WIDTH(WIDTH)) LedDataReg(rawclk, LedEn, rst, a0, LedData);
+//     wire [WIDTH-1:0] MockLedData;
+//     assign MockLedData = ((EX_PC)<<16) | (a0 & 32'h0000ffff);
+//     register #(.WIDTH(WIDTH)) LedDataReg(clk, 1'b1, rst, MockLedData, LedData);
 
     wire GoRegRst, GoRegData;
     assign GoRegRst = !ecall | rst;
     assign GoRegData = GO && halt;
 
-    register #(.WIDTH(1)) GoReg(clk, 1'b1, GoRegRst, GoRegData, GoRegOut);
+    register #(.WIDTH(1)) GoReg(rawclk, 1'b1, GoRegRst, GoRegData, GoRegOut);
 
     assign Continue = GoRegOut | !halt;
 

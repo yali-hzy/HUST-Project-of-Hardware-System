@@ -7,20 +7,25 @@ module EX2MEM(clk, en, rst, RegWrite_in, RegWrite_out, WriteRegNo_in, WriteRegNo
     IEWriteData_in, IEWriteData_out, EPCWriteData_in, EPCWriteData_out,
     IRS_in, IRS_out,
     LB_in, LB_out, LH_in, LH_out, LHU_in, LHU_out,
-    SB_in, SB_out, SH_in, SH_out);
+    SB_in, SB_out, SH_in, SH_out, 
+    CAUSEWrite_in, CAUSEWrite_out, CAUSEWriteData_in, CAUSEWriteData_out);
 
     parameter WIDTH = 32;
     input clk, en, rst;
     input RegWrite_in, MemToReg_in, MemWrite_in, LBU_in, ecall_in, 
         uret_in, Int_Enter_in, CSRWrite_in, IEWrite_in, EPCWrite_in, IEWriteData_in;
     input LB_in, LH_in, LHU_in, SB_in, SH_in;
+    input CAUSEWrite_in;
     input [WIDTH-1:0] PC_in, IR_in, WriteData_in, Result_in, a0_in, a7_in, EPCWriteData_in;
+    input [WIDTH-1:0] CAUSEWriteData_in;
     input [4:0] WriteRegNo_in;
     input [2:0] IRS_in;
     output RegWrite_out, MemToReg_out, MemWrite_out, LBU_out, ecall_out,
         uret_out, Int_Enter_out, CSRWrite_out, IEWrite_out, EPCWrite_out, IEWriteData_out;
     output LB_out, LH_out, LHU_out, SB_out, SH_out;
+    output CAUSEWrite_out;
     output [WIDTH-1:0] PC_out, IR_out, WriteData_out, Result_out, a0_out, a7_out, EPCWriteData_out;
+    output [WIDTH-1:0] CAUSEWriteData_out;
     output [4:0] WriteRegNo_out;
     output [2:0] IRS_out;
 
@@ -49,5 +54,7 @@ module EX2MEM(clk, en, rst, RegWrite_in, RegWrite_out, WriteRegNo_in, WriteRegNo
     sync_reset_reg #(.WIDTH(1)) LHU_reg(clk, en, rst, LHU_in, LHU_out);
     sync_reset_reg #(.WIDTH(1)) SB_reg(clk, en, rst, SB_in, SB_out);
     sync_reset_reg #(.WIDTH(1)) SH_reg(clk, en, rst, SH_in, SH_out);
+    sync_reset_reg #(.WIDTH(1)) CAUSEWrite_reg(clk, en, rst, CAUSEWrite_in, CAUSEWrite_out);
+    sync_reset_reg #(.WIDTH(WIDTH)) CAUSEWriteData_reg(clk, en, rst, CAUSEWriteData_in, CAUSEWriteData_out);
 
 endmodule

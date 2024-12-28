@@ -2,6 +2,7 @@
 #[macro_export]
 macro_rules! print {
     ($painter: expr, $fmt: literal $(, $($arg: tt)+)?) => {
+        #[cfg(not(target_os = "none"))]
         $painter.print(format_args!($fmt $(, $($arg)+)?));
     }
 }
@@ -10,6 +11,7 @@ macro_rules! print {
 #[macro_export]
 macro_rules! println {
     ($painter: expr, $fmt: literal $(, $($arg: tt)+)?) => {
+        #[cfg(not(target_os = "none"))]
         $painter.print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
     }
 }

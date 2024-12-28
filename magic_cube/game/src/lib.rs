@@ -17,7 +17,7 @@ const HEIGHT: usize = 280;
 pub trait Painter {
     fn draw(&mut self, x: usize, y: usize);
     fn set_color(&mut self, color: u8);
-    #[cfg(feature = "print")]
+    #[cfg(not(target_os = "none"))]
     fn print(&self, args: core::fmt::Arguments);
 }
 

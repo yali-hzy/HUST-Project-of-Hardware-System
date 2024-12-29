@@ -1,6 +1,5 @@
-use crate::{println, sync::UPSafeCell, Painter};
-use core:: ops::Add;
-
+use crate::{sync::UPSafeCell, Painter};
+use core::ops::Add;
 
 const NUMWIDTH: usize = 16;
 const NUMHEIGHT: usize = 12;
@@ -8,8 +7,7 @@ const CUBEWIDTH: usize = 66;
 const CUBEHEIGHT: usize = 63;
 const PICWIDTH: usize = 488;
 const PICHEIGHT: usize = 280;
-const CUBENUM: usize = 3;
-
+const CUBENUM: usize = 14;
 
 #[derive(Copy, Clone)]
 enum Color {
@@ -26,6 +24,7 @@ enum Color {
 
     BarrierBorder = 9,
     Barrier = 10,
+
 }
 
 static NUM_PIX: [[[u8; 12]; 16]; 10] = [
@@ -612,6 +611,51 @@ static CUBE_PIX: [[u8; 66]; 63] = [
     ],
 ];
 
+const CROWNWIDTH: usize = 63;
+const CROWNHEIGHT: usize = 39;
+
+static  CROWN_PIX: [[u8; 63]; 39] = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 3, 3, 0, 0, 0, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0, 0, 0, 3, 3, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 3, 3, 0, 0, 0, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0, 0, 0, 3, 3, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2],
+    [2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2],
+    [2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+];
+
 #[derive(Copy, Clone)]
 struct Cube {
     up: u8,
@@ -629,13 +673,16 @@ struct Block {
     magic: u8,
 }
 
+static BLOCKS: UPSafeCell<[Block; 64]> = UPSafeCell::new(
+    [Block {
+        cube: None,
+        magic: 0,
+    }; 64],
+);
 
-static BLOCKS: UPSafeCell <[Block; 64]> = UPSafeCell::new([Block {
-    cube: None,
-    magic: 0,
-}; 64]);
+static CROWNPOS: UPSafeCell<Pos> = UPSafeCell::new(Pos { x: 0, y: 0 });
 
-static CUBE_LIST: UPSafeCell<[u8; CUBENUM]> = UPSafeCell::new([0, 63, 1]);
+static CUBE_LIST: UPSafeCell<[u8; CUBENUM]> = UPSafeCell::new([0, 63, 7, 11, 13, 16, 20, 25, 29, 31, 39, 44, 48, 52]);
 
 static USING_CUBE: UPSafeCell<u8> = UPSafeCell::new(0);
 
@@ -746,6 +793,18 @@ fn draw_cube(painter: &mut impl Painter, p: Pos, cube: &Cube) {
     }
 }
 
+fn draw_crown(painter: &mut impl Painter, p: Pos) {
+
+    for i in 0..CROWNHEIGHT {
+        for j in 0..CROWNWIDTH {
+            if CROWN_PIX[i][j] != 0 {
+                painter.set_color(10 + CROWN_PIX[i][j]);
+                painter.draw(p.y as usize + j, p.x as usize + i);
+            }
+        }
+    }
+}
+
 fn min(a: u8, b: u8) -> u8 {
     return if a < b { a } else { b };
 }
@@ -753,19 +812,18 @@ fn min(a: u8, b: u8) -> u8 {
 //先把逻辑计算完
 //重画所有方块旁边的背景
 //方块重画
-fn magic_effect(magic: u8, num: u8) -> u8{
+fn magic_effect(magic: u8, num: u8) -> u8 {
     return if magic == 1 {
         min(num + 1, 9)
     } else if magic == 2 {
         min(num + (num >> 1), 9)
-    }else{
+    } else {
         num
     };
 }
 
 fn change_cube(cube: &Cube, dir: Pos, magic: u8) -> Cube {
-    return 
-    if dir.x == -15 && dir.y == 30 {
+    return if dir.x == -15 && dir.y == 30 {
         Cube {
             up: cube.front,
             down: magic_effect(magic, cube.back),
@@ -775,7 +833,8 @@ fn change_cube(cube: &Cube, dir: Pos, magic: u8) -> Cube {
             back: cube.up,
             style: 1,
         }
-    } // A
+    }
+    // A
     else if dir.x == -15 && dir.y == -30 {
         Cube {
             up: cube.right,
@@ -786,7 +845,8 @@ fn change_cube(cube: &Cube, dir: Pos, magic: u8) -> Cube {
             back: cube.back,
             style: 1,
         }
-    } // S
+    }
+    // S
     else if dir.x == 15 && dir.y == -30 {
         Cube {
             up: cube.back,
@@ -797,8 +857,9 @@ fn change_cube(cube: &Cube, dir: Pos, magic: u8) -> Cube {
             back: cube.down,
             style: 1,
         }
-    } // D
-    else{
+    }
+    // D
+    else {
         Cube {
             up: cube.left,
             down: magic_effect(magic, cube.right),
@@ -811,7 +872,6 @@ fn change_cube(cube: &Cube, dir: Pos, magic: u8) -> Cube {
     };
 }
 
-
 fn pos_to_id(p: Pos) -> i8 {
     for (iter, &pos) in BLOCK_POS.iter().enumerate() {
         if p.x == pos.x && p.y == pos.y {
@@ -821,24 +881,24 @@ fn pos_to_id(p: Pos) -> i8 {
     return -1;
 }
 
-fn check_around(cube1: &Cube, cube2: &Cube, p1: Pos, p2: Pos) -> i8{
-    if p1.x - p2.x == 15 && p1.y - p2.y == -30{
-        if cube1.back >= cube2.front{
+fn check_around(cube1: &Cube, cube2: &Cube, p1: Pos, p2: Pos) -> i8 {
+    if p1.x - p2.x == 15 && p1.y - p2.y == -30 {
+        if cube1.back >= cube2.front {
             return 1;
         }
         return 2;
-    }else if p1.x - p2.x == 15 && p1.y - p2.y == 30{
-        if cube1.left >= cube2.right{
+    } else if p1.x - p2.x == 15 && p1.y - p2.y == 30 {
+        if cube1.left >= cube2.right {
             return 1;
         }
         return 2;
-    }else if p1.x - p2.x == -15 && p1.y - p2.y == 30{
-        if cube1.front >= cube2.back{
+    } else if p1.x - p2.x == -15 && p1.y - p2.y == 30 {
+        if cube1.front >= cube2.back {
             return 1;
         }
         return 2;
-    }else if p1.x - p2.x == -15 && p1.y - p2.y == -30{
-        if cube1.right >= cube2.left{
+    } else if p1.x - p2.x == -15 && p1.y - p2.y == -30 {
+        if cube1.right >= cube2.left {
             return 1;
         }
         return 2;
@@ -846,9 +906,8 @@ fn check_around(cube1: &Cube, cube2: &Cube, p1: Pos, p2: Pos) -> i8{
     return 0;
 }
 
-pub fn response_call(painter: &mut impl Painter, dirx: i16, diry: i16) {
-
-    let dir = Pos{x: dirx, y: diry};
+pub fn response_call(dirx: i16, diry: i16) {
+    let dir = Pos { x: dirx, y: diry };
 
     let uc = USING_CUBE.as_mut().clone();
     *USING_CUBE.as_mut() = 1 - uc;
@@ -857,14 +916,21 @@ pub fn response_call(painter: &mut impl Painter, dirx: i16, diry: i16) {
     let origin_p = BLOCK_POS[origin_id as usize];
     let origin_cube = (BLOCKS.as_mut())[origin_id as usize].cube.unwrap();
 
-    let move_p = Pos{x: origin_p.x + dir.x, y: origin_p.y + dir.y};
+    let move_p = Pos {
+        x: origin_p.x + dir.x,
+        y: origin_p.y + dir.y,
+    };
     let move_id = pos_to_id(move_p);
 
     let not_use_id = CUBE_LIST.as_mut()[1 - uc as usize] as usize;
 
     BLOCKS.as_mut()[not_use_id].cube.as_mut().unwrap().style = 0;
-    BLOCKS.as_mut()[origin_id as usize].cube.as_mut().unwrap().style = 1;
-    
+    BLOCKS.as_mut()[origin_id as usize]
+        .cube
+        .as_mut()
+        .unwrap()
+        .style = 1;
+
     if move_id == -1 || BLOCKS.as_mut()[move_id as usize].cube.is_some() {
         return;
     }
@@ -874,30 +940,51 @@ pub fn response_call(painter: &mut impl Painter, dirx: i16, diry: i16) {
 
     BLOCKS.as_mut()[origin_id as usize].cube = None;
     BLOCKS.as_mut()[move_id as usize].cube = Some(move_cube);
-    
+
     CUBE_LIST.as_mut()[uc as usize] = move_id as u8;
 
-    let result = check_around(&move_cube, 
-        &BLOCKS.as_mut()[not_use_id].cube.unwrap()
-            ,move_p, BLOCK_POS[not_use_id]);
+    let result = check_around(
+        &move_cube,
+        &BLOCKS.as_mut()[not_use_id].cube.unwrap(),
+        move_p,
+        BLOCK_POS[not_use_id],
+    );
 
     if result == 1 {
         BLOCKS.as_mut()[not_use_id].cube = None;
         CUBE_LIST.as_mut()[1 - uc as usize] = 100;
-    }else if result == 2 {
+        CROWNPOS.as_mut().x = move_p.x - 100;
+        CROWNPOS.as_mut().y = move_p.y - 28;
+        
+    } else if result == 2 {
         BLOCKS.as_mut()[move_id as usize].cube = None;
         CUBE_LIST.as_mut()[uc as usize] = 100;
+        CROWNPOS.as_mut().x = BLOCK_POS[not_use_id].x - 100;
+        CROWNPOS.as_mut().y = BLOCK_POS[not_use_id].y - 28;
     }
-
 }
 
+fn creat_block(id: u8) {
+    (BLOCKS.as_mut())[id as usize].cube = Some(Cube {
+        up: 1,
+        down: 1,
+        left: 1,
+        right: 1,
+        front: 1,
+        back: 1,
+        style: 2,
+    });
+}
 
 pub fn __ini__() {
-
-
-    (BLOCKS.as_mut())[15].magic = 1;
-
-    (BLOCKS.as_mut())[35].magic = 2;
+    let magic_1 = [10u8,12,22,33,45,58];
+    for &i in magic_1.iter() {
+        (BLOCKS.as_mut())[i as usize].magic = 1;
+    }
+    let magic_2 = [21u8, 5, 19, 38, 40, 34, 57];
+    for &i in magic_2.iter() {
+        (BLOCKS.as_mut())[i as usize].magic = 2;
+    }
     (BLOCKS.as_mut())[0].cube = Some(Cube {
         up: 1,
         down: 5,
@@ -917,19 +1004,16 @@ pub fn __ini__() {
         style: 1,
     });
 
-    (BLOCKS.as_mut())[1].cube = Some(Cube {
-        up: 1,
-        down: 5,
-        left: 3,
-        right: 3,
-        front: 2,
-        back: 6,
-        style: 2,
-    });
+    creat_block(7); creat_block(11); creat_block(13);
+    creat_block(16); creat_block(20); creat_block(25);
+    creat_block(29); creat_block(31); creat_block(39);
+    creat_block(44); creat_block(48); creat_block(52); 
+
+
+
 }
 
 pub fn draw_chess(painter: &mut impl Painter) {
-
     painter.set_color(Color::Background as u8);
 
     for i in 0..PICHEIGHT {
@@ -939,7 +1023,6 @@ pub fn draw_chess(painter: &mut impl Painter) {
     }
 
     for (i, block) in (BLOCKS.as_mut()).iter().enumerate() {
-
         if let None = block.cube {
             draw_border(painter, &block, BLOCK_POS[i]);
         }
@@ -948,9 +1031,8 @@ pub fn draw_chess(painter: &mut impl Painter) {
     let mut close_cube: u8 = 65;
     let mut used_cube: i8 = -1;
 
-
-    for _ in 0..CUBENUM{
-        for &j in CUBE_LIST.as_mut().iter(){
+    for _ in 0..CUBENUM {
+        for &j in CUBE_LIST.as_mut().iter() {
             if j == 100 {
                 continue;
             }
@@ -958,7 +1040,7 @@ pub fn draw_chess(painter: &mut impl Painter) {
                 close_cube = j;
             }
         }
-        
+
         if close_cube == 65 {
             break;
         }
@@ -967,5 +1049,8 @@ pub fn draw_chess(painter: &mut impl Painter) {
             draw_cube(painter, BLOCK_POS[close_cube as usize], &cube);
         }
         close_cube = 65;
+    }
+    if CROWNPOS.as_mut().x != 0 {
+        draw_crown(painter, CROWNPOS.as_mut().clone());
     }
 }

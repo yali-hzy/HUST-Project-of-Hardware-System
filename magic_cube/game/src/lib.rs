@@ -31,24 +31,24 @@ pub fn init(painter: &mut impl Painter) {
 
 #[allow(dead_code)]
 pub fn handle_up(painter: &mut impl Painter) {
-    response_call(painter, -15, 30);
+    response_call(-15, 30);
     draw_chess(painter);
 }
 
 #[allow(dead_code)]
 pub fn handle_down(painter: &mut impl Painter) {
-    response_call(painter, 15, -30);
+    response_call(15, -30);
     draw_chess(painter);
 }
 
 #[allow(dead_code)]
 pub fn handle_left(painter: &mut impl Painter) {
-    response_call(painter, -15, -30);
+    response_call(-15, -30);
     draw_chess(painter);
 }
 
 #[allow(dead_code)]
 pub fn handle_right(painter: &mut impl Painter) {
-    response_call(painter, 15, 30);
+    response_call(15, 30);
     draw_chess(painter);
 }

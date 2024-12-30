@@ -11,7 +11,7 @@ SECTIONS
     .text : {
         *(.text.entry)
         . = TRAP_ADDRESS;
-        *(.text.trampoline)
+        *(.text.trap)
         *(.text .text.*)
     }
     . = VGA_BASE;

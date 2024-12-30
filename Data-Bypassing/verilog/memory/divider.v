@@ -10,11 +10,12 @@ always @(posedge clk or posedge rst)  begin
     end
     else
     if (en) begin
-        counter <= counter + 1;
-        if (counter == N/2) begin
+        if (counter == N/2 - 1) begin
             counter <= 0;
             clk_N <= ~clk_N;
         end
+        else
+            counter <= counter + 1;
     end
-end                           
+end
 endmodule

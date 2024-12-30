@@ -7,8 +7,8 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
         case (OP_CODE)
             'h0: begin
                 case (Funct[2:0])
-                3'b010: MemToReg = 5; // lw
-                3'b100: MemToReg = 6; // lbu
+                3'b010: MemToReg = 1; // lw
+                3'b100: MemToReg = 1; // lbu
                 default: MemToReg = 0;
                 endcase
             end
@@ -63,6 +63,12 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
                 default: ALU_SRC = 0;
                 endcase
             end
+            'h19: begin
+                case (Funct[2:0])
+                3'b000: ALU_SRC = 1; // JALR
+                default: ALU_SRC = 0;
+                endcase
+            end
             default: ALU_SRC = 0;
         endcase
     end
@@ -83,8 +89,8 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
             end
             'h0: begin
                 case (Funct[2:0])
-                3'b010: RegWrite = 1;
-                3'b100: RegWrite = 1;
+                3'b010: RegWrite = 1; // lw
+                3'b100: RegWrite = 1; // lbu
                 default: RegWrite = 0;
                 endcase
             end
@@ -159,6 +165,12 @@ module signal_generator (OP_CODE, Funct, MemToReg, MemWrite, ALU_SRC, RegWrite, 
                 case (Funct[2:0])
                 3'b000: {JAL, Jalr, LUI, LBU, Beq, Bne, Bltu, STI, CLI} = 9'b000000010; // CSRRSI
                 3'b001: {JAL, Jalr, LUI, LBU, Beq, Bne, Bltu, STI, CLI} = 9'b000000001; // CSRRCI
+                default: {JAL, Jalr, LUI, LBU, Beq, Bne, Bltu, STI, CLI} = 9'b000000000;
+                endcase
+            end
+            'h0: begin
+                case (Funct[2:0])
+                3'b100: {JAL, Jalr, LUI, LBU, Beq, Bne, Bltu, STI, CLI} = 9'b000100000; // LBU
                 default: {JAL, Jalr, LUI, LBU, Beq, Bne, Bltu, STI, CLI} = 9'b000000000;
                 endcase
             end

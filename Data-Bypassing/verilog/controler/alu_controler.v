@@ -50,6 +50,19 @@ module alu_controler (OP_CODE, Funct, ALU_OP);
                 default: ALU_OP = 0;
                 endcase
             end
+            'h0: begin
+                case (Funct[2:0])
+                3'b010: ALU_OP = 5; // lw
+                3'b100: ALU_OP = 5; // lbu
+                default: ALU_OP = 0;
+                endcase
+            end
+            'h8: begin
+                case (Funct[2:0])
+                3'b010: ALU_OP = 5; // sw
+                default: ALU_OP = 0;
+                endcase
+            end
             default: ALU_OP = 0;
         endcase
     end

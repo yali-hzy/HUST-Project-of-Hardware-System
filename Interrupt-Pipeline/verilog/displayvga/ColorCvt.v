@@ -36,7 +36,9 @@ module ColorCvt(colorId, color);
         8: tmp_color = 'hccc;
         9: tmp_color = 'hc88;
         10: tmp_color = 'h8c8;
-        11: tmp_color = 'h88c;
+        11: tmp_color = 'he63;
+        12: tmp_color = 'hfc0;
+        13: tmp_color = 'hff0;
         default: tmp_color = 'h111;
     endcase
     assign color = tmp_color;

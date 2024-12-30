@@ -5,6 +5,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
+use std::io::{stdout, Write};
 use std::time::Duration;
 
 const WIDTH: u32 = 488;
@@ -41,7 +42,13 @@ impl<'a> Painter for SDL2Painter<'a> {
             8 => (192, 192, 192),
             9 => (192, 128, 128),
             10 => (128, 192, 128),
-            11 => (128, 128, 192),
+            11 => (237, 100, 48),
+            12 => (255, 201, 14),
+            13 => (255, 242, 0),
+            // 11 => (15, 6, 3)
+            // 12 => (16, 13, 0)
+            // 13 => (16, 16, 0)
+
             _ => panic!("Invalid color"),
         };
         let r = r >> 4;
@@ -49,6 +56,9 @@ impl<'a> Painter for SDL2Painter<'a> {
         let b = b >> 4;
         self.pixel_color_data[0] = (g << 4) | (b);
         self.pixel_color_data[1] = (0xf << 4) | (r);
+    }
+    fn print(&self, args: std::fmt::Arguments) {
+        stdout().write_fmt(args).unwrap();
     }
 }
 

@@ -1,0 +1,7 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "magic_cube/bare_metal/Cargo.toml",
+        "magic_cube/emulator/Cargo.toml",
+        "magic_cube/game/Cargo.toml",
+    ]
+}
